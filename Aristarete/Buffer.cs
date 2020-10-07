@@ -21,12 +21,6 @@ namespace Aristarete
             get => Pixels[i, j];
             set => Pixels[i, j] = value;
         }
-        
-        public uint this[int i]
-        {
-            get => Pixels[i % Height, i / Width];
-            set => Pixels[i % Height, i / Width] = value;
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool CheckIfSafe(int x, int y)
