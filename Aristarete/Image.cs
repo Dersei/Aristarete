@@ -4,11 +4,11 @@ using SkiaSharp;
 
 namespace Aristarete
 {
-    public class Image
+    public static class Image
     {
         public static unsafe void Save(string filename, Buffer buffer)
         {
-            SKBitmap bitmap = new SKBitmap(buffer.Width, buffer.Height, SKColorType.Rgba8888, SKAlphaType.Unpremul);
+            SKBitmap bitmap = new SKBitmap(buffer.Width, buffer.Height, SKColorType.Bgra8888, SKAlphaType.Unpremul);
             
             fixed (uint* ptr = buffer.Pixels)
             {

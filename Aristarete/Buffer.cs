@@ -22,6 +22,12 @@ namespace Aristarete
             set => Pixels[i, j] = value;
         }
 
+        public uint this[int i]
+        {
+            get => Pixels[i % Width, i / Height];
+            set => Pixels[i % Width, i / Height] = value;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool CheckIfSafe(int x, int y)
         {
@@ -34,16 +40,29 @@ namespace Aristarete
             if (!CheckIfSafe(x, y)) return;
             Pixels[y, x] = color;
         }
-
-        public void Clear(uint color)
+        
+                
+        public void Clear(FloatColor color)
         {
-            for (var i = 0; i < Pixels.GetLength(0); i++)
+            for (var i = 0; i < Height; i++)
             {
-                for (var j = 0; j < Pixels.GetLength(1); j++)
+                for (var j = 0; j < Width; j++)
                 {
                     Pixels[i, j] = color;
                 }
             }
         }
+
+        public void Clear(uint color)
+        {
+            for (var i = 0; i < Height; i++)
+            {
+                for (var j = 0; j < Width; j++)
+                {
+                    Pixels[i, j] = color;
+                }
+            }
+        }
+
     }
 }
