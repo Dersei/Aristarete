@@ -2,11 +2,18 @@
 
 namespace Aristarete
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        public static uint PackColor(byte r, byte g, byte b, byte a = 255)
         {
-            Console.WriteLine("Hello World!");
+            return (((uint) a << 24) + ((uint) b << 16) + ((uint) g << 8) + r);
+        }
+
+        private static void Main()
+        {
+            var buffer = new Buffer(512, 512);
+            buffer.Clear(PackColor(255, 0, 0));
+            Image.Save($"output{DateTime.Now:yyyy-dd-M--HH-mm-ss.fff}.ppm", buffer);
         }
     }
 }
