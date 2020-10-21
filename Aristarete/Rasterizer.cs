@@ -22,9 +22,10 @@ namespace Aristarete
 
         private Vector3 ToBufferCoords(Vector3 originalCoord)
         {
-            return new Vector3((originalCoord.X + 1.0f) * _width * 0.5f, (-originalCoord.Y + 1.0f) * _height * 0.5f, originalCoord.Z);
+            return new Vector3((int) ((originalCoord.X + 1.0f) * _width * 0.5f),
+                (int) ((-originalCoord.Y + 1.0f) * _height * 0.5f), originalCoord.Z);
         }
-        
+
         public void Triangle(Vector3[] vertices, FloatColor[] color)
         {
             vertices[0] = ToBufferCoords(vertices[0]);
@@ -49,7 +50,7 @@ namespace Aristarete
             {
                 for (var y = bBoxMin.Y; y <= bBoxMax.Y; y++)
                 {
-                    var barycentric = barycentricHelper.Calculate(x,y,z);
+                    var barycentric = barycentricHelper.Calculate(x, y, z);
                     if (barycentric.X < 0 || barycentric.Y < 0 || barycentric.Z < 0) continue;
                     z = 0;
                     z += vertices[0].Z * barycentric.X;
@@ -58,14 +59,15 @@ namespace Aristarete
                     var zCoord = (int) (x + y * _width);
                     if (z < _zBuffer[zCoord])
                     {
-                        _zBuffer[zCoord] = (int)z;
-                        if(barycentricHelper.FirstEdge || barycentricHelper.SecondEdge || barycentricHelper.ThirdEdge)
-                            Buffer[(int) x, (int) y] = color[0] * barycentric.X + color[1] * barycentric.Y + color[2] * barycentric.Z;
+                        _zBuffer[zCoord] = (int) z;
+                        if (barycentricHelper.FirstEdge || barycentricHelper.SecondEdge || barycentricHelper.ThirdEdge)
+                            Buffer[(int) x, (int) y] = color[0] * barycentric.X + color[1] * barycentric.Y +
+                                                       color[2] * barycentric.Z;
                     }
                 }
             }
         }
-        
+
         private readonly struct BarycentricHelper
         {
             public readonly float Dx12;
@@ -115,7 +117,6 @@ namespace Aristarete
 
                 return new Vector3(a, b, c);
             }
-
         }
     }
 }
