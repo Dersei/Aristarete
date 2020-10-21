@@ -28,7 +28,7 @@ namespace Aristarete.TgaTools
             return tga;
         }
 
-        public void WriteToFile(string path, bool rle = false)
+        public void WriteToFile(string path, bool compress = false)
         {
             var bpp = (int) _format;
             using var writer = new BinaryWriter(File.Create(path));
@@ -39,19 +39,19 @@ namespace Aristarete.TgaTools
                 BitsPerPixel = (byte) (bpp * 8),
                 Width = (short) _width,
                 Height = (short) _height,
-                DataTypeCode = GetCorrectDataType(bpp, rle),
+                DataTypeCode = GetCorrectDataType(bpp, compress),
                 ImageDescriptor = (byte) (32 | (_format == TgaFormat.BGRA ? 8 : 0)) // top-left origin
             };
 
-            WriteTo(writer, header);
-            if (!rle)
+            WriteHeader(writer, header);
+            if (!compress)
                 writer.Write(_data);
             else
                 UnloadRleData(writer);
         }
 
 
-        private static void WriteTo(BinaryWriter writer, TgaHeader header)
+        private static void WriteHeader(BinaryWriter writer, TgaHeader header)
         {
             writer.Write(header.IdLength);
             writer.Write(header.ColorMapType);
@@ -116,15 +116,15 @@ namespace Aristarete.TgaTools
             }
         }
 
-        private static DataType GetCorrectDataType(int bpp, bool rle)
+        private static DataType GetCorrectDataType(int bpp, bool compress)
         {
             var format = (TgaFormat) bpp;
             if (format == TgaFormat.Grayscale)
             {
-                return rle ? DataType.RleBlackAndWhiteImage : DataType.UncompressedBlackAndWhiteImage;
+                return compress ? DataType.RleBlackAndWhiteImage : DataType.UncompressedBlackAndWhiteImage;
             }
 
-            return rle ? DataType.RleTrueColorImage : DataType.UncompressedTrueColorImage;
+            return compress ? DataType.RleTrueColorImage : DataType.UncompressedTrueColorImage;
         }
     }
 }

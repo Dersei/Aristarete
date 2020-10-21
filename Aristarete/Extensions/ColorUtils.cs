@@ -1,4 +1,4 @@
-﻿namespace Aristarete
+﻿namespace Aristarete.Extensions
 {
     public static class ColorUtils
     {

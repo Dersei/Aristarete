@@ -1,10 +1,11 @@
 ﻿using System.Runtime.CompilerServices;
+using Aristarete.Basic;
 
 namespace Aristarete
 {
     public class Buffer
     {
-        public uint[,] Pixels { get; }
+        public uint[,] Pixels { get; private set; }
         public int Width { get; }
         public int Height { get; }
         public int Count => Pixels.Length;
@@ -18,14 +19,8 @@ namespace Aristarete
 
         public uint this[int i, int j]
         {
-            get => Pixels[i, j];
-            set => Pixels[i, j] = value;
-        }
-
-        public uint this[int i]
-        {
-            get => Pixels[i % Width, i / Height];
-            set => Pixels[i % Width, i / Height] = value;
+            get => Pixels[j, i];
+            set => Pixels[j, i] = value;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -40,8 +35,12 @@ namespace Aristarete
             if (!CheckIfSafe(x, y)) return;
             Pixels[y, x] = color;
         }
-        
-                
+
+        public void SetPixels(uint[,] pixels)
+        {
+            Pixels = pixels;
+        }
+
         public void Clear(FloatColor color)
         {
             for (var i = 0; i < Height; i++)
@@ -63,6 +62,5 @@ namespace Aristarete
                 }
             }
         }
-
     }
 }

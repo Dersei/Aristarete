@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using Aristarete.Aethra.RayTracer.Extensions;
+using Aristarete.Extensions;
 
-namespace Aristarete
+namespace Aristarete.Basic
 {
     public readonly struct FloatColor : IEquatable<FloatColor>, IFormattable
     {
@@ -18,7 +18,6 @@ namespace Aristarete
             B = b;
             A = a;
         }
-
 
         public static FloatColor operator +(FloatColor v1, FloatColor v2)
         {
@@ -53,24 +52,24 @@ namespace Aristarete
             var a = color1.A * color2.A;
             return new FloatColor(r, g, b, a);
         }
-        
-        public static FloatColor FromRGB(float r, float g, float b)
+
+        public static FloatColor FromRgb(float r, float g, float b)
         {
             return new FloatColor(r, g, b);
         }
 
-        public static FloatColor FromRGBA(float r, float g, float b, float a = 1)
+        public static FloatColor FromRgba(float r, float g, float b, float a = 1)
         {
             return new FloatColor(r, g, b, a);
         }
 
-        public static FloatColor FromRGBA(int r, int g, int b, int a = 1)
+        public static FloatColor FromRgba(int r, int g, int b, int a = 255)
         {
             return new FloatColor(r / 255f, g / 255f, b / 255f, a / 255f);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private uint ClampValue(float value)
+        private static uint ClampValue(float value)
         {
             return value <= 0 ? 0 : value >= 255 ? 255 : (uint) value;
         }
@@ -146,7 +145,7 @@ namespace Aristarete
         {
             return $"FloatColor - ({R}, {G}, {B}, {A})";
         }
-        
+
         public string ToString(string? format, IFormatProvider? formatProvider)
         {
             return
