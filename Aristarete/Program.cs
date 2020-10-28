@@ -12,7 +12,7 @@ namespace Aristarete
             var buffer = new Buffer(512, 512);
             buffer.Clear(FloatColor.Black);
             var rasterizer = new Rasterizer(buffer);
-            var displayWindow = new DisplayWindow(rasterizer, new BasicRendering());
+            var displayWindow = new DisplayWindow(rasterizer, new MatrixRendering());
             displayWindow.Display();
             Console.ReadKey();
         }

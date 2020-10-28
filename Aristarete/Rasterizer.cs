@@ -9,37 +9,37 @@ namespace Aristarete
 
         private readonly int _width;
         private readonly int _height;
-        private readonly int[] _zBuffer;
+        private readonly float[] _zBuffer;
 
         public Rasterizer(Buffer buffer)
         {
             Buffer = buffer;
             _width = buffer.Width;
             _height = buffer.Height;
-            _zBuffer = new int[_width * _height];
-            Array.Fill(_zBuffer, int.MaxValue);
+            _zBuffer = new float[_width * _height];
+            Array.Fill(_zBuffer, float.MaxValue);
         }
 
-        private Vector3 ToBufferCoords(Vector3 originalCoord)
+        private Float3 ToBufferCoords(Float3 originalCoord)
         {
-            return new Vector3((int) ((originalCoord.X + 1.0f) * _width * 0.5f),
+            return new Float3((int) ((originalCoord.X + 1.0f) * _width * 0.5f),
                 (int) ((-originalCoord.Y + 1.0f) * _height * 0.5f), originalCoord.Z);
         }
 
-        public void Triangle(Vector3[] vertices, FloatColor[] color)
+        public void Triangle(Float3[] vertices, FloatColor[] color)
         {
             vertices[0] = ToBufferCoords(vertices[0]);
             vertices[1] = ToBufferCoords(vertices[1]);
             vertices[2] = ToBufferCoords(vertices[2]);
 
-            var bBoxMin = new Vector2(float.MaxValue, float.MaxValue);
-            var bBoxMax = new Vector2(float.MinValue, float.MinValue);
-            var clamp = new Vector2(_width - 1, _height - 1);
+            var bBoxMin = new Float2(float.MaxValue, float.MaxValue);
+            var bBoxMax = new Float2(float.MinValue, float.MinValue);
+            var clamp = new Float2(_width - 1, _height - 1);
 
             for (var i = 0; i < 3; i++)
             {
-                bBoxMin = Vector2.Min(bBoxMin, vertices[i].XY);
-                bBoxMax = Vector2.Max(bBoxMax, vertices[i].XY, clamp);
+                bBoxMin = Float2.Min(bBoxMin, vertices[i].XY);
+                bBoxMax = Float2.Max(bBoxMax, vertices[i].XY, clamp);
             }
 
             var z = 0f;
@@ -53,13 +53,14 @@ namespace Aristarete
                     var barycentric = barycentricHelper.Calculate(x, y, z);
                     if (barycentric.X < 0 || barycentric.Y < 0 || barycentric.Z < 0) continue;
                     z = 0;
-                    z += vertices[0].Z * barycentric.X;
-                    z += vertices[1].Z * barycentric.Y;
-                    z += vertices[2].Z * barycentric.Z;
+                    z += 1f / vertices[0].Z * barycentric.X;
+                    z += 1f / vertices[1].Z * barycentric.Y;
+                    z += 1f / vertices[2].Z * barycentric.Z;
+                    z = 1f / z;
                     var zCoord = (int) (x + y * _width);
                     if (z < _zBuffer[zCoord])
                     {
-                        _zBuffer[zCoord] = (int) z;
+                        _zBuffer[zCoord] = z;
                         if (barycentricHelper.FirstEdge || barycentricHelper.SecondEdge || barycentricHelper.ThirdEdge)
                             Buffer[(int) x, (int) y] = color[0] * barycentric.X + color[1] * barycentric.Y +
                                                        color[2] * barycentric.Z;
@@ -88,7 +89,7 @@ namespace Aristarete
             public readonly bool SecondEdge;
             public readonly bool ThirdEdge;
 
-            public BarycentricHelper(Vector3 v1, Vector3 v2, Vector3 v3)
+            public BarycentricHelper(Float3 v1, Float3 v2, Float3 v3)
             {
                 Dx12 = v1.X - v2.X;
                 Dx13 = v1.X - v3.X;
@@ -109,20 +110,20 @@ namespace Aristarete
                 ThirdEdge = Dy31 < 0 || Dy31 == 0 && Dx31 > 0;
             }
 
-            public Vector3 Calculate(float x, float y, float z)
+            public Float3 Calculate(float x, float y, float z)
             {
                 var a = (Dy23 * (x - V3X) + Dx32 * (y - V3Y)) * MultiplierA;
                 var b = (Dy31 * (x - V3X) + Dx13 * (y - V3Y)) * MultiplierB;
                 var c = 1 - a - b;
 
-                return new Vector3(a, b, c);
+                return new Float3(a, b, c);
             }
         }
 
         public void Clear()
         {
             Buffer.Clear(FloatColor.Black);
-            Array.Fill(_zBuffer, int.MaxValue);
+            Array.Fill(_zBuffer, float.MaxValue);
         }
     }
 }

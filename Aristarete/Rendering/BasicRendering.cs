@@ -5,7 +5,7 @@ namespace Aristarete.Rendering
 {
     public class BasicRendering : IRendering
     {
-        private Vector3 _v = new Vector3(-0.5f, 0.5f, 0.0f);
+        private Float3 _v = new Float3(-0.5f, 0.5f, 0.0f);
         
         public void Run(Rasterizer rasterizer)
         {
@@ -21,8 +21,8 @@ namespace Aristarete.Rendering
             rasterizer.Triangle(new[]
                 {
                     _v,
-                    new Vector3(0.5f, 0.5f, 0.0f),
-                    new Vector3(0.5f, -0.5f, 0.0f)
+                    new Float3(0.5f, 0.5f, 0.0f),
+                    new Float3(0.5f, -0.5f, 0.0f)
                 },
                 new[]
                 {
@@ -33,9 +33,9 @@ namespace Aristarete.Rendering
 
             rasterizer.Triangle(new[]
                 {
-                    new Vector3(0.5f, -0.5f, 0.0f),
-                    new Vector3(-0.5f, -0.5f, 0.0f),
-                    new Vector3(-0.5f, 0.5f, 0.0f)
+                    new Float3(0.5f, -0.5f, 0.0f),
+                    new Float3(-0.5f, -0.5f, 0.0f),
+                    new Float3(-0.5f, 0.5f, 0.0f)
                 },
                 new[]
                 {
@@ -46,9 +46,9 @@ namespace Aristarete.Rendering
 
             rasterizer.Triangle(new[]
                 {
-                    new Vector3(1f, 0.5f, 2.0f),
-                    new Vector3(0f, -0.5f, 2.0f),
-                    new Vector3(0.8f, -1.5f, -1.0f)
+                    new Float3(1f, 0.5f, 2.0f),
+                    new Float3(0f, -0.5f, 2.0f),
+                    new Float3(0.8f, -1.5f, -1.0f)
                 },
                 new[]
                 {
@@ -59,9 +59,9 @@ namespace Aristarete.Rendering
 
             rasterizer.Triangle(new[]
                 {
-                    new Vector3(0.5f, 0.5f, 0.0f),
-                    new Vector3(0.5f, -0.5f, 0.0f),
-                    new Vector3(1.5f, -1.5f, 0.0f)
+                    new Float3(0.5f, 0.5f, 0.0f),
+                    new Float3(0.5f, -0.5f, 0.0f),
+                    new Float3(1.5f, -1.5f, 0.0f)
                 },
                 new[]
                 {
