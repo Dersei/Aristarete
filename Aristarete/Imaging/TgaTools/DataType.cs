@@ -1,4 +1,4 @@
-﻿namespace Aristarete.TgaTools
+﻿namespace Aristarete.Imaging.TgaTools
 {
     public enum DataType : byte
     {

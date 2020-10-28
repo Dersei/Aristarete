@@ -6,7 +6,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using SkiaSharp;
 
-namespace Aristarete
+namespace Aristarete.Imaging
 {
     public static class PngImage
     {

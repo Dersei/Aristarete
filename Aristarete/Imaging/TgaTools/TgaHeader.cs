@@ -1,5 +1,5 @@
 ﻿#pragma warning disable 649
-namespace Aristarete.TgaTools
+namespace Aristarete.Imaging.TgaTools
 {
     internal struct TgaHeader
     {

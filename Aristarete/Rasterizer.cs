@@ -118,5 +118,11 @@ namespace Aristarete
                 return new Vector3(a, b, c);
             }
         }
+
+        public void Clear()
+        {
+            Buffer.Clear(FloatColor.Black);
+            Array.Fill(_zBuffer, int.MaxValue);
+        }
     }
 }
