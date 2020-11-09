@@ -23,7 +23,7 @@ namespace Aristarete.Imaging.TgaTools
 
         public static TgaImage FromBuffer(Buffer buffer)
         {
-            var tga = new TgaImage(buffer.Width, buffer.Height, TgaFormat.BGRA);
+            var tga = new TgaImage(buffer.Width, buffer.Height, TgaFormat.Bgra);
             System.Buffer.BlockCopy(buffer.Pixels, 0, tga._data, 0, tga._data.Length);
             return tga;
         }
@@ -40,7 +40,7 @@ namespace Aristarete.Imaging.TgaTools
                 Width = (short) _width,
                 Height = (short) _height,
                 DataTypeCode = GetCorrectDataType(bpp, compress),
-                ImageDescriptor = (byte) (32 | (_format == TgaFormat.BGRA ? 8 : 0)) // top-left origin
+                ImageDescriptor = (byte) (32 | (_format == TgaFormat.Bgra ? 8 : 0)) // top-left origin
             };
 
             WriteHeader(writer, header);

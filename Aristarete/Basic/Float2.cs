@@ -163,7 +163,7 @@ namespace Aristarete.Basic
         {
             return X * v.X + Y * v.Y;
         }
-        
+
         public Float2 Reflect(Float2 normal)
         {
             var factor = -2F * Dot(normal);
@@ -176,7 +176,7 @@ namespace Aristarete.Basic
             t = MathExtensions.Clamp01(t);
             return new Float2(X + t * (v.X - X), Y + t * (v.Y - Y));
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Float2 LerpUnclamped(Float2 v, float t)
         {
@@ -234,16 +234,25 @@ namespace Aristarete.Basic
             return FromBuiltIn(Vector2.Transform(vector3.ToBuiltIn(), transformMatrix));
         }
 
-        public static Float2 Min(Float2 v1, Float2 v2)
+        public static Float2 MinAbsolute(Float2 v1, Float2 v2)
         {
             return new Float2(MathF.Max(0, MathF.Min(v1.X, v2.X)), MathF.Max(0, MathF.Min(v1.Y, v2.Y)));
         }
 
-        public static Float2 Max(Float2 v1, Float2 v2, Float2 clamp)
+        public static Float2 MaxClamped(Float2 v1, Float2 v2, Float2 clamp)
         {
             return new Float2(MathF.Min(clamp.X, MathF.Max(v1.X, v2.X)), MathF.Min(clamp.Y, MathF.Max(v1.Y, v2.Y)));
         }
 
+        public static Float2 Min(Float2 v1, Float2 v2)
+        {
+            return new Float2(MathF.Min(v1.X, v2.X), MathF.Min(v1.Y, v2.Y));
+        }
+
+        public static Float2 Max(Float2 v1, Float2 v2)
+        {
+            return new Float2(MathF.Max(v1.X, v2.X), MathF.Max(v1.Y, v2.Y));
+        }
 
         public static implicit operator Float2((float x, float y, float z) values) =>
             new Float2(values.x, values.y);

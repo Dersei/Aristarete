@@ -67,6 +67,30 @@ namespace Aristarete.Basic
         {
             return new FloatColor(r / 255f, g / 255f, b / 255f, a / 255f);
         }
+        
+        public static FloatColor FromArgb(int a, int r, int g, int b)
+        {
+            return new FloatColor(r / 255f, g / 255f, b / 255f, a / 255f);
+        }
+
+        public static FloatColor FromRgba(uint color)
+        {
+            var r = (byte) ((color >> 0) & 255);
+            var g = (byte) ((color >> 8) & 255);
+            var b = (byte) ((color >> 16) & 255);
+            var a = (byte) ((color >> 24) & 255);
+            return FromRgba(r, g, b, a);
+        }
+        
+        
+        public static FloatColor FromArgb(uint color)
+        {
+            var b = (byte) ((color >> 0) & 255);
+            var g = (byte) ((color >> 8) & 255);
+            var r = (byte) ((color >> 16) & 255);
+            var a = (byte) ((color >> 24) & 255);
+            return FromArgb(a, r, g, b);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint ClampValue(float value)
@@ -98,7 +122,18 @@ namespace Aristarete.Basic
             return System.Drawing.Color.FromArgb(a, r, g, b);
         }
 
+        public static implicit operator FloatColor(System.Drawing.Color color)
+        {
+            return FromRgba(color.R, color.G, color.B, color.A);
+        }
+
+        /// <summary>
+        /// (0,0,0,0)
+        /// </summary>
         public static FloatColor Black = new FloatColor(0, 0, 0);
+        /// <summary>
+        /// (1,1,1,1)
+        /// </summary>
         public static FloatColor White = new FloatColor(1, 1, 1);
         public static FloatColor Grey = new FloatColor(0.5f, 0.5f, 0.5f);
         public static FloatColor Red = new FloatColor(1, 0, 0);

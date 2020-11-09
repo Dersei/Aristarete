@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using Aristarete.Extensions;
 
 namespace Aristarete.Basic
@@ -43,8 +45,8 @@ namespace Aristarete.Basic
             M44 = column4.W;
         }
 
-        public Matrix(float m11, float m21, float m31, float m41, float m12, float m22, float m32, float m42, float m13,
-            float m23, float m33, float m43, float m14, float m24, float m34, float m44)
+       public Matrix(float m11, float m12, float m13, float m14, float m21, float m22, float m23, float m24, float m31,
+            float m32, float m33, float m34, float m41, float m42, float m43, float m44)
         {
             M11 = m11;
             M21 = m21;
@@ -238,86 +240,133 @@ namespace Aristarete.Basic
 {M41.ToString(format, formatProvider)}    {M42.ToString(format, formatProvider)}    {M43.ToString(format, formatProvider)}    {M44.ToString(format, formatProvider)}{Environment.NewLine}";
         }
 
-        public static Matrix operator *(Matrix lhs, Matrix rhs)
+        public static unsafe Matrix operator *(Matrix left, Matrix right)
         {
+            //  if (Sse.IsSupported)
+            // {
+            //     var row = Sse.LoadVector128(&left.M11);
+            //     Sse.Store(&left.M11,
+            //         Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&right.M11)),
+            //                 Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&right.M12))),
+            //             Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&right.M13)),
+            //                 Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&right.M14)))));
+            //
+            //     // 0x00 is _MM_SHUFFLE(0,0,0,0), 0x55 is _MM_SHUFFLE(1,1,1,1), etc.
+            //     // TODO: Replace with a method once it's added to the API.
+            //
+            //     row = Sse.LoadVector128(&left.M12);
+            //     Sse.Store(&left.M12,
+            //         Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&right.M11)),
+            //                 Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&right.M12))),
+            //             Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&right.M13)),
+            //                 Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&right.M14)))));
+            //
+            //     row = Sse.LoadVector128(&left.M13);
+            //     Sse.Store(&left.M13,
+            //         Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&right.M11)),
+            //                 Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&right.M12))),
+            //             Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&right.M13)),
+            //                 Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&right.M14)))));
+            //
+            //     row = Sse.LoadVector128(&left.M14);
+            //     Sse.Store(&left.M14,
+            //         Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&right.M11)),
+            //                 Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&right.M12))),
+            //             Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&right.M13)),
+            //                 Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&right.M14)))));
+            //     return left;
+            // }
             Matrix res;
-            res.M11 = lhs.M11 * rhs.M11 + lhs.M12 * rhs.M21 + lhs.M13 * rhs.M31 + lhs.M14 * rhs.M41;
-            res.M12 = lhs.M11 * rhs.M12 + lhs.M12 * rhs.M22 + lhs.M13 * rhs.M32 + lhs.M14 * rhs.M42;
-            res.M13 = lhs.M11 * rhs.M13 + lhs.M12 * rhs.M23 + lhs.M13 * rhs.M33 + lhs.M14 * rhs.M43;
-            res.M14 = lhs.M11 * rhs.M14 + lhs.M12 * rhs.M24 + lhs.M13 * rhs.M34 + lhs.M14 * rhs.M44;
+            res.M11 = left.M11 * right.M11 + left.M12 * right.M21 + left.M13 * right.M31 + left.M14 * right.M41;
+            res.M12 = left.M11 * right.M12 + left.M12 * right.M22 + left.M13 * right.M32 + left.M14 * right.M42;
+            res.M13 = left.M11 * right.M13 + left.M12 * right.M23 + left.M13 * right.M33 + left.M14 * right.M43;
+            res.M14 = left.M11 * right.M14 + left.M12 * right.M24 + left.M13 * right.M34 + left.M14 * right.M44;
 
-            res.M21 = lhs.M21 * rhs.M11 + lhs.M22 * rhs.M21 + lhs.M23 * rhs.M31 + lhs.M24 * rhs.M41;
-            res.M22 = lhs.M21 * rhs.M12 + lhs.M22 * rhs.M22 + lhs.M23 * rhs.M32 + lhs.M24 * rhs.M42;
-            res.M23 = lhs.M21 * rhs.M13 + lhs.M22 * rhs.M23 + lhs.M23 * rhs.M33 + lhs.M24 * rhs.M43;
-            res.M24 = lhs.M21 * rhs.M14 + lhs.M22 * rhs.M24 + lhs.M23 * rhs.M34 + lhs.M24 * rhs.M44;
+            res.M21 = left.M21 * right.M11 + left.M22 * right.M21 + left.M23 * right.M31 + left.M24 * right.M41;
+            res.M22 = left.M21 * right.M12 + left.M22 * right.M22 + left.M23 * right.M32 + left.M24 * right.M42;
+            res.M23 = left.M21 * right.M13 + left.M22 * right.M23 + left.M23 * right.M33 + left.M24 * right.M43;
+            res.M24 = left.M21 * right.M14 + left.M22 * right.M24 + left.M23 * right.M34 + left.M24 * right.M44;
 
-            res.M31 = lhs.M31 * rhs.M11 + lhs.M32 * rhs.M21 + lhs.M33 * rhs.M31 + lhs.M34 * rhs.M41;
-            res.M32 = lhs.M31 * rhs.M12 + lhs.M32 * rhs.M22 + lhs.M33 * rhs.M32 + lhs.M34 * rhs.M42;
-            res.M33 = lhs.M31 * rhs.M13 + lhs.M32 * rhs.M23 + lhs.M33 * rhs.M33 + lhs.M34 * rhs.M43;
-            res.M34 = lhs.M31 * rhs.M14 + lhs.M32 * rhs.M24 + lhs.M33 * rhs.M34 + lhs.M34 * rhs.M44;
+            res.M31 = left.M31 * right.M11 + left.M32 * right.M21 + left.M33 * right.M31 + left.M34 * right.M41;
+            res.M32 = left.M31 * right.M12 + left.M32 * right.M22 + left.M33 * right.M32 + left.M34 * right.M42;
+            res.M33 = left.M31 * right.M13 + left.M32 * right.M23 + left.M33 * right.M33 + left.M34 * right.M43;
+            res.M34 = left.M31 * right.M14 + left.M32 * right.M24 + left.M33 * right.M34 + left.M34 * right.M44;
 
-            res.M41 = lhs.M41 * rhs.M11 + lhs.M42 * rhs.M21 + lhs.M43 * rhs.M31 + lhs.M44 * rhs.M41;
-            res.M42 = lhs.M41 * rhs.M12 + lhs.M42 * rhs.M22 + lhs.M43 * rhs.M32 + lhs.M44 * rhs.M42;
-            res.M43 = lhs.M41 * rhs.M13 + lhs.M42 * rhs.M23 + lhs.M43 * rhs.M33 + lhs.M44 * rhs.M43;
-            res.M44 = lhs.M41 * rhs.M14 + lhs.M42 * rhs.M24 + lhs.M43 * rhs.M34 + lhs.M44 * rhs.M44;
+            res.M41 = left.M41 * right.M11 + left.M42 * right.M21 + left.M43 * right.M31 + left.M44 * right.M41;
+            res.M42 = left.M41 * right.M12 + left.M42 * right.M22 + left.M43 * right.M32 + left.M44 * right.M42;
+            res.M43 = left.M41 * right.M13 + left.M42 * right.M23 + left.M43 * right.M33 + left.M44 * right.M43;
+            res.M44 = left.M41 * right.M14 + left.M42 * right.M24 + left.M43 * right.M34 + left.M44 * right.M44;
 
             return res;
         }
 
-        public static Float4 operator *(Matrix lhs, Float4 vector)
+        public static unsafe Float4 operator *(Matrix matrix, Float4 vector)
         {
-            var resx = lhs.M11 * vector.X + lhs.M12 * vector.Y + lhs.M13 * vector.Z + lhs.M14 * vector.W;
-            var resy = lhs.M21 * vector.X + lhs.M22 * vector.Y + lhs.M23 * vector.Z + lhs.M24 * vector.W;
-            var resz = lhs.M31 * vector.X + lhs.M32 * vector.Y + lhs.M33 * vector.Z + lhs.M34 * vector.W;
-            var resw = lhs.M41 * vector.X + lhs.M42 * vector.Y + lhs.M43 * vector.Z + lhs.M44 * vector.W;
-            return new Float4(resx, resy, resz, resw);
+            if (Sse.IsSupported)
+            {
+                Float4 result = default;
+                var valueX = Vector128.Create(vector.X);
+                var valueY = Vector128.Create(vector.Y);
+                var valueZ = Vector128.Create(vector.Z);
+                var valueW = Vector128.Create(vector.W);
+                Sse.Store(&result.X, Sse.Add(Sse.Add(Sse.Add(
+                            Sse.Multiply(Sse.LoadVector128(&matrix.M11), valueX), 
+                            Sse.Multiply(Sse.LoadVector128(&matrix.M12), valueY)),
+                        Sse.Multiply(Sse.LoadVector128(&matrix.M13), valueZ)),
+                    Sse.Multiply(Sse.LoadVector128(&matrix.M14), valueW)));
+                return result;
+            }
+            var resultX = matrix.M11 * vector.X + matrix.M12 * vector.Y + matrix.M13 * vector.Z + matrix.M14 * vector.W;
+            var resultY = matrix.M21 * vector.X + matrix.M22 * vector.Y + matrix.M23 * vector.Z + matrix.M24 * vector.W;
+            var resultZ = matrix.M31 * vector.X + matrix.M32 * vector.Y + matrix.M33 * vector.Z + matrix.M34 * vector.W;
+            var resultW = matrix.M41 * vector.X + matrix.M42 * vector.Y + matrix.M43 * vector.Z + matrix.M44 * vector.W;
+            return new Float4(resultX, resultY, resultZ, resultW);
         }
 
-        public static bool operator ==(Matrix lhs, Matrix rhs)
+        public static bool operator ==(Matrix left, Matrix right)
         {
             // Returns false in the presence of NaN values.
-            return lhs.GetColumn(0) == rhs.GetColumn(0)
-                   && lhs.GetColumn(1) == rhs.GetColumn(1)
-                   && lhs.GetColumn(2) == rhs.GetColumn(2)
-                   && lhs.GetColumn(3) == rhs.GetColumn(3);
+            return left.GetColumn(0) == right.GetColumn(0)
+                   && left.GetColumn(1) == right.GetColumn(1)
+                   && left.GetColumn(2) == right.GetColumn(2)
+                   && left.GetColumn(3) == right.GetColumn(3);
         }
 
         //*undoc*
-        public static bool operator !=(Matrix lhs, Matrix rhs)
+        public static bool operator !=(Matrix left, Matrix right)
         {
             // Returns true in the presence of NaN values.
-            return !(lhs == rhs);
+            return !(left == right);
         }
 
         public Float3 MultiplyPoint(Float3 point)
         {
-            float w;
-            var resx = M11 * point.X + M12 * point.Y + M13 * point.Z + M14;
-            var resy = M21 * point.X + M22 * point.Y + M23 * point.Z + M24;
-            var resz = M31 * point.X + M32 * point.Y + M33 * point.Z + M34;
-            w = M41 * point.X + M42 * point.Y + M43 * point.Z + M44;
+            var resultX = M11 * point.X + M12 * point.Y + M13 * point.Z + M14;
+            var resultY = M21 * point.X + M22 * point.Y + M23 * point.Z + M24;
+            var resultZ = M31 * point.X + M32 * point.Y + M33 * point.Z + M34;
+            var w = M41 * point.X + M42 * point.Y + M43 * point.Z + M44;
 
             w = 1F / w;
-            resx *= w;
-            resy *= w;
-            resz *= w;
-            return new Float3(resx, resy, resz);
+            resultX *= w;
+            resultY *= w;
+            resultZ *= w;
+            return new Float3(resultX, resultY, resultZ);
         }
 
         public Float3 MultiplyPoint3X4(Float3 point)
         {
-            var resx = M11 * point.X + M12 * point.Y + M13 * point.Z + M14;
-            var resy = M21 * point.X + M22 * point.Y + M23 * point.Z + M24;
-            var resz = M31 * point.X + M32 * point.Y + M33 * point.Z + M34;
-            return new Float3(resx, resy, resz);
+            var resultX = M11 * point.X + M12 * point.Y + M13 * point.Z + M14;
+            var resultY = M21 * point.X + M22 * point.Y + M23 * point.Z + M24;
+            var resultZ = M31 * point.X + M32 * point.Y + M33 * point.Z + M34;
+            return new Float3(resultX, resultY, resultZ);
         }
 
         public Float3 MultiplyVector(Float3 vector)
         {
-            var resx = M11 * vector.X + M12 * vector.Y + M13 * vector.Z;
-            var resy = M21 * vector.X + M22 * vector.Y + M23 * vector.Z;
-            var resz = M31 * vector.X + M32 * vector.Y + M33 * vector.Z;
-            return new Float3(resx, resy, resz);
+            var resultX = M11 * vector.X + M12 * vector.Y + M13 * vector.Z;
+            var resultY = M21 * vector.X + M22 * vector.Y + M23 * vector.Z;
+            var resultZ = M31 * vector.X + M32 * vector.Y + M33 * vector.Z;
+            return new Float3(resultX, resultY, resultZ);
         }
 
         public static Matrix Rotate(float angle, Float3 axis)
@@ -328,17 +377,17 @@ namespace Aristarete.Basic
             axis = axis.Normalize();
 
             return new Matrix(
-                axis.X * axis.X * (1 - c) + c, 
+                axis.X * axis.X * (1 - c) + c,
                 axis.Y * axis.X * (1 - c) + axis.Z * s,
-                axis.X * axis.Z * (1 - c) - axis.Y * s, 
+                axis.X * axis.Z * (1 - c) - axis.Y * s,
                 0,
-                axis.X * axis.Y * (1 - c) - axis.Z * s, 
+                axis.X * axis.Y * (1 - c) - axis.Z * s,
                 axis.Y * axis.Y * (1 - c) + c,
-                axis.Y * axis.Z * (1 - c) + axis.X * s, 
+                axis.Y * axis.Z * (1 - c) + axis.X * s,
                 0,
-                axis.X * axis.Z * (1 - c) + axis.Y * s, 
+                axis.X * axis.Z * (1 - c) + axis.Y * s,
                 axis.Y * axis.Z * (1 - c) - axis.X * s,
-                axis.Z * axis.Z * (1 - c) + c, 
+                axis.Z * axis.Z * (1 - c) + c,
                 0,
                 0, 0, 0, 1);
         }
@@ -387,56 +436,59 @@ namespace Aristarete.Basic
             m.M44 = 1F;
             return m;
         }
-        
+
         public static Matrix CreateLookAt(Float3 cameraPosition, Float3 cameraTarget, Float3 cameraUpVector)
         {
-            var zaxis = (cameraPosition - cameraTarget).Normalize();
-            var xaxis = cameraUpVector.Cross(zaxis).Normalize();
-            var yaxis = zaxis.Cross(xaxis);
- 
+            var zAxis = (cameraPosition - cameraTarget).Normalize();
+            var xAxis = cameraUpVector.Cross(zAxis).Normalize();
+            var yAxis = zAxis.Cross(xAxis);
+
             var result = Identity;
- 
-            result.M11 = xaxis.X;
-            result.M21 = yaxis.X;
-            result.M31 = zaxis.X;
- 
-            result.M12 = xaxis.Y;
-            result.M22 = yaxis.Y;
-            result.M32 = zaxis.Y;
- 
-            result.M13 = xaxis.Z;
-            result.M23 = yaxis.Z;
-            result.M33 = zaxis.Z;
- 
-            result.M14 = -Float3.Dot(xaxis, cameraPosition);
-            result.M24 = -Float3.Dot(yaxis, cameraPosition);
-            result.M34 = -Float3.Dot(zaxis, cameraPosition);
- 
+
+            result.M11 = xAxis.X;
+            result.M21 = yAxis.X;
+            result.M31 = zAxis.X;
+
+            result.M12 = xAxis.Y;
+            result.M22 = yAxis.Y;
+            result.M32 = zAxis.Y;
+
+            result.M13 = xAxis.Z;
+            result.M23 = yAxis.Z;
+            result.M33 = zAxis.Z;
+
+            result.M14 = -Float3.Dot(xAxis, cameraPosition);
+            result.M24 = -Float3.Dot(yAxis, cameraPosition);
+            result.M34 = -Float3.Dot(zAxis, cameraPosition);
+
             return result;
         }
-        
-        public static Matrix CreatePerspective(float fieldOfView, float aspectRatio, float nearPlaneDistance, float farPlaneDistance)
+
+        public static Matrix CreatePerspective(float fieldOfView, float aspectRatio, float nearPlaneDistance,
+            float farPlaneDistance)
         {
             fieldOfView *= MathExtensions.Deg2Rad;
             var yScale = 1.0f / MathF.Tan(fieldOfView * 0.5f);
             var xScale = yScale / aspectRatio;
- 
+
             Matrix result;
- 
+
             result.M11 = xScale;
             result.M21 = result.M31 = result.M41 = 0.0f;
- 
+
             result.M22 = yScale;
             result.M12 = result.M32 = result.M42 = 0.0f;
- 
+
             result.M13 = result.M23 = 0.0f;
-            var negFarRange = float.IsPositiveInfinity(farPlaneDistance) ? -1.0f : farPlaneDistance / (nearPlaneDistance - farPlaneDistance);
+            var negFarRange = float.IsPositiveInfinity(farPlaneDistance)
+                ? -1.0f
+                : farPlaneDistance / (nearPlaneDistance - farPlaneDistance);
             result.M33 = negFarRange;
             result.M43 = -1.0f;
- 
+
             result.M14 = result.M24 = result.M44 = 0.0f;
             result.M34 = nearPlaneDistance * negFarRange;
- 
+
             return result;
         }
 

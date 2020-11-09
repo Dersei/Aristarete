@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Aristarete.Basic;
+using Aristarete.Models;
 
 namespace Aristarete
 {
@@ -20,6 +22,7 @@ namespace Aristarete
             Array.Fill(_zBuffer, float.MaxValue);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Float3 ToBufferCoords(Float3 originalCoord)
         {
             return new Float3((int) ((originalCoord.X + 1.0f) * _width * 0.5f),
@@ -38,11 +41,9 @@ namespace Aristarete
 
             for (var i = 0; i < 3; i++)
             {
-                bBoxMin = Float2.Min(bBoxMin, vertices[i].XY);
-                bBoxMax = Float2.Max(bBoxMax, vertices[i].XY, clamp);
+                bBoxMin = Float2.MinAbsolute(bBoxMin, vertices[i].XY);
+                bBoxMax = Float2.MaxClamped(bBoxMax, vertices[i].XY, clamp);
             }
-
-            var z = 0f;
 
             var barycentricHelper = new BarycentricHelper(vertices[0], vertices[1], vertices[2]);
 
@@ -50,9 +51,9 @@ namespace Aristarete
             {
                 for (var y = bBoxMin.Y; y <= bBoxMax.Y; y++)
                 {
-                    var barycentric = barycentricHelper.Calculate(x, y, z);
+                    var barycentric = barycentricHelper.Calculate(x, y);
                     if (barycentric.X < 0 || barycentric.Y < 0 || barycentric.Z < 0) continue;
-                    z = 0;
+                    float z = 0;
                     z += 1f / vertices[0].Z * barycentric.X;
                     z += 1f / vertices[1].Z * barycentric.Y;
                     z += 1f / vertices[2].Z * barycentric.Z;
@@ -64,6 +65,53 @@ namespace Aristarete
                         if (barycentricHelper.FirstEdge || barycentricHelper.SecondEdge || barycentricHelper.ThirdEdge)
                             Buffer[(int) x, (int) y] = color[0] * barycentric.X + color[1] * barycentric.Y +
                                                        color[2] * barycentric.Z;
+                    }
+                }
+            }
+        }
+
+        public void Triangle(Float3[] vertices, Float2[] uvs, Model model)
+        {
+            vertices[0] = ToBufferCoords(vertices[0]);
+            vertices[1] = ToBufferCoords(vertices[1]);
+            vertices[2] = ToBufferCoords(vertices[2]);
+
+            var bBoxMin = new Float2(float.MaxValue, float.MaxValue);
+            var bBoxMax = new Float2(float.MinValue, float.MinValue);
+            var clamp = new Float2(_width - 1, _height - 1);
+
+            for (var i = 0; i < 3; i++)
+            {
+                bBoxMin = Float2.MinAbsolute(bBoxMin, vertices[i].XY);
+                bBoxMax = Float2.MaxClamped(bBoxMax, vertices[i].XY, clamp);
+            }
+
+            var z = 0f;
+
+            var barycentricHelper = new BarycentricHelper(vertices[0], vertices[1], vertices[2]);
+
+            for (var x = bBoxMin.X; x <= bBoxMax.X; x++)
+            {
+                for (var y = bBoxMin.Y; y <= bBoxMax.Y; y++)
+                {
+                    var barycentric = barycentricHelper.Calculate(x, y);
+                    if (barycentric.X < 0 || barycentric.Y < 0 || barycentric.Z < 0) continue;
+                    z = 0;
+                    z += 1f / vertices[0].Z * barycentric.X;
+                    z += 1f / vertices[1].Z * barycentric.Y;
+                    z += 1f / vertices[2].Z * barycentric.Z;
+                    z = 1f / z;
+                    var zCoord = (int) (x + y * _width);
+                    if (z < _zBuffer[zCoord])
+                    {
+                        _zBuffer[zCoord] = z;
+
+                        if (barycentricHelper.FirstEdge || barycentricHelper.SecondEdge || barycentricHelper.ThirdEdge)
+                        {
+                            var uv = uvs[0] * barycentric.X + uvs[1] * barycentric.Y + uvs[2] * barycentric.Z;
+                            var color = model.GetDiffuse(uv);
+                            Buffer[(int) x, (int) y] = color;
+                        }
                     }
                 }
             }
@@ -110,7 +158,7 @@ namespace Aristarete
                 ThirdEdge = Dy31 < 0 || Dy31 == 0 && Dx31 > 0;
             }
 
-            public Float3 Calculate(float x, float y, float z)
+            public Float3 Calculate(float x, float y)
             {
                 var a = (Dy23 * (x - V3X) + Dx32 * (y - V3Y)) * MultiplierA;
                 var b = (Dy31 * (x - V3X) + Dx13 * (y - V3Y)) * MultiplierB;

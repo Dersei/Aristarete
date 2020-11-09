@@ -1,18 +1,18 @@
-﻿using Aristarete.Basic;
+﻿using System;
+using Aristarete.Basic;
 using Aristarete.Inputting;
 
 namespace Aristarete.Rendering
 {
-    public class MatrixRendering : IRendering
+    public class FovAspectRendering : IRendering
     {
-        private float _angleLeft;
-        private float _angleUp;
+        private float _fov = 60;
+        private float _aspect = 1;
         private readonly VertexProcessor _vertexProcessor = new VertexProcessor();
-        private bool _isRotating;
 
-        public MatrixRendering()
+        public FovAspectRendering()
         {
-            _vertexProcessor.SetPerspective(60, 1, 1, 1000);
+            _vertexProcessor.SetPerspective(_fov, _aspect, 1, 1000);
             _vertexProcessor.SetLookAt(new Float3(0, 0, 5), new Float3(0, 0, -1), Float3.Up);
             _vertexProcessor.SetIdentity();
         }
@@ -21,32 +21,33 @@ namespace Aristarete.Rendering
         {
             if (Input.IsNewPress(Keys.A))
             {
-                _angleLeft += 1f;
+                _fov += 10f;
+                Console.WriteLine($"FOV: {_fov}");
             }
             else if (Input.IsNewPress(Keys.D))
             {
-                _angleLeft -= 1f;
+                _fov -= 10f;
+                Console.WriteLine($"FOV: {_fov}");
             }
 
             if (Input.IsNewPress(Keys.W))
             {
-                _angleUp += 1f;
+                _aspect += 1f;
+                Console.WriteLine("Aspect: " + (_aspect < 0 ? $"{-_aspect}:1" : $"1:{_aspect}"));
             }
             else if (Input.IsNewPress(Keys.S))
             {
-                _angleUp -= 1f;
-            }
-            else if (Input.IsNewPress(Keys.R))
-            {
-                _isRotating = !_isRotating;
+                _aspect -= 1f;
+                Console.WriteLine("Aspect: " + (_aspect < 0 ? $"{-_aspect}:1" : $"1:{_aspect}"));
             }
 
-            if (!_isRotating) _vertexProcessor.SetIdentity();
-            _vertexProcessor.Rotate(_angleLeft, Float3.Up);
-            _vertexProcessor.Rotate(_angleUp, Float3.Left);
+            _vertexProcessor.SetIdentity();
+            _vertexProcessor.Rotate(20, Float3.Up);
+            _vertexProcessor.Rotate(35, Float3.Left);
+            _vertexProcessor.SetPerspective(_fov, _aspect, 1, 1000);
             _vertexProcessor.Transform();
-
-            rasterizer.Triangle(new[]
+            
+             rasterizer.Triangle(new[]
                 {
                     _vertexProcessor.Apply(new Float3(-1.0f, -1.0f, -1.0f)),
                     _vertexProcessor.Apply(new Float3(-1.0f, -1.0f, 1.0f)),

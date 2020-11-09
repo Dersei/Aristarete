@@ -12,9 +12,8 @@ namespace Aristarete
             var buffer = new Buffer(512, 512);
             buffer.Clear(FloatColor.Black);
             var rasterizer = new Rasterizer(buffer);
-            var displayWindow = new DisplayWindow(rasterizer, new MatrixRendering());
+            var displayWindow = new DisplayWindow(rasterizer, new FovAspectRendering());
             displayWindow.Display();
-            Console.ReadKey();
         }
     }
 }

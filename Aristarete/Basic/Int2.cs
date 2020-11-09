@@ -27,12 +27,15 @@ namespace Aristarete.Basic
             1 => Y,
             _ => throw new ArgumentOutOfRangeException(nameof(index))
         };
-        
-        public float Length => MathF.Sqrt(X * X + Y * Y );
+
+        public float Length => MathF.Sqrt(X * X + Y * Y);
 
         public float LengthSquared => X * X + Y * Y;
-        
-        public static float Distance(Int2 a, Int2 b) { return (a - b).Length; }
+
+        public static float Distance(Int2 a, Int2 b)
+        {
+            return (a - b).Length;
+        }
 
         public Int2 Clamp(Int2 min, Int2 max)
         {
@@ -110,6 +113,16 @@ namespace Aristarete.Basic
         public static Int2 operator /(Int2 a, int b)
         {
             return new Int2(a.X / b, a.Y / b);
+        }
+
+        public static Int2 Min(Int2 v1, Int2 v2)
+        {
+            return new Int2(Math.Min(v1.X, v2.X), Math.Min(v1.Y, v2.Y));
+        }
+
+        public static Int2 Max(Int2 v1, Int2 v2)
+        {
+            return new Int2(Math.Max(v1.X, v2.X), Math.Max(v1.Y, v2.Y));
         }
 
         public string ToString(string? format, IFormatProvider? formatProvider)

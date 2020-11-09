@@ -1,26 +1,14 @@
-﻿using System.Windows.Input;
-using Aristarete.Basic;
+﻿using Aristarete.Basic;
 
 namespace Aristarete.Rendering
 {
     public class BasicRendering : IRendering
     {
-        private Float3 _v = new Float3(-0.5f, 0.5f, 0.0f);
-        
         public void Run(Rasterizer rasterizer)
         {
-            if (Keyboard.IsKeyDown(Key.A))
-            {
-                _v *= 0.9f;
-            }
-            else if(Keyboard.IsKeyDown(Key.D))
-            {
-                _v /= 0.9f;
-            }
-            
             rasterizer.Triangle(new[]
                 {
-                    _v,
+                    new Float3(-0.5f, 0.5f, 0.0f),
                     new Float3(0.5f, 0.5f, 0.0f),
                     new Float3(0.5f, -0.5f, 0.0f)
                 },

@@ -118,6 +118,16 @@ namespace Aristarete.Basic
         {
             return new Int3(a.X / b, a.Y / b, a.Z / b);
         }
+        
+        public static Int3 Min(Int3 v1, Int3 v2)
+        {
+            return new Int3(Math.Min(v1.X, v2.X), Math.Min(v1.Y, v2.Y), Math.Min(v1.Z, v2.Z));
+        }
+
+        public static Int3 Max(Int3 v1, Int3 v2)
+        {
+            return new Int3(Math.Max(v1.X, v2.X), Math.Max(v1.Y, v2.Y), Math.Max(v1.Z, v2.Z));
+        }
 
         public string ToString(string? format, IFormatProvider? formatProvider)
         {
