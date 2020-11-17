@@ -13,6 +13,7 @@ namespace Aristarete.Models
         public List<Float3> Vertices { get; } = new List<Float3>();
         public List<Int3[]> Faces { get; } = new List<Int3[]>();
         public List<Float2> UV { get; } = new List<Float2>();
+        public FloatColor ColorAngle = new FloatColor(1,1,1,1);
         private uint[]? _diffuseMap;
         private int _mapWidth;
         private int _mapHeight;
@@ -89,7 +90,7 @@ namespace Aristarete.Models
             if (_diffuseMap is null) return FloatColor.Error;
             var x = (int) uv.X;
             var y = (int) uv.Y;
-            return FloatColor.FromArgb(_diffuseMap[x + (_mapHeight - y - 1) * _mapWidth]);
+            return FloatColor.FromArgb(_diffuseMap[x + (_mapHeight - y - 1) * _mapWidth]) * ColorAngle;
         }
     }
 }

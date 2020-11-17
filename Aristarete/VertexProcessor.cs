@@ -19,6 +19,11 @@ namespace Aristarete
         {
             World2View *= Matrix.CreateLookAt(eye,center,up);
         }
+
+        public void SetIdentityToView()
+        {
+            World2View = Matrix.Identity;
+        }
         
         public void SetIdentity()
         {

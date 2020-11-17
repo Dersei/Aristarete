@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using Aristarete.Extensions;
@@ -45,7 +46,7 @@ namespace Aristarete.Basic
             M44 = column4.W;
         }
 
-       public Matrix(float m11, float m12, float m13, float m14, float m21, float m22, float m23, float m24, float m31,
+        public Matrix(float m11, float m12, float m13, float m14, float m21, float m22, float m23, float m24, float m31,
             float m32, float m33, float m34, float m41, float m42, float m43, float m44)
         {
             M11 = m11;
@@ -242,40 +243,35 @@ namespace Aristarete.Basic
 
         public static unsafe Matrix operator *(Matrix left, Matrix right)
         {
-            //  if (Sse.IsSupported)
-            // {
-            //     var row = Sse.LoadVector128(&left.M11);
-            //     Sse.Store(&left.M11,
-            //         Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&right.M11)),
-            //                 Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&right.M12))),
-            //             Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&right.M13)),
-            //                 Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&right.M14)))));
-            //
-            //     // 0x00 is _MM_SHUFFLE(0,0,0,0), 0x55 is _MM_SHUFFLE(1,1,1,1), etc.
-            //     // TODO: Replace with a method once it's added to the API.
-            //
-            //     row = Sse.LoadVector128(&left.M12);
-            //     Sse.Store(&left.M12,
-            //         Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&right.M11)),
-            //                 Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&right.M12))),
-            //             Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&right.M13)),
-            //                 Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&right.M14)))));
-            //
-            //     row = Sse.LoadVector128(&left.M13);
-            //     Sse.Store(&left.M13,
-            //         Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&right.M11)),
-            //                 Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&right.M12))),
-            //             Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&right.M13)),
-            //                 Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&right.M14)))));
-            //
-            //     row = Sse.LoadVector128(&left.M14);
-            //     Sse.Store(&left.M14,
-            //         Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&right.M11)),
-            //                 Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&right.M12))),
-            //             Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&right.M13)),
-            //                 Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&right.M14)))));
-            //     return left;
-            // }
+            if (Sse.IsSupported)
+            {
+                var row = Sse.LoadVector128(&right.M11);
+                Sse.Store(&right.M11,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&left.M11)),
+                            Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&left.M12))),
+                        Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&left.M13)),
+                            Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&left.M14)))));
+                row = Sse.LoadVector128(&right.M12);
+                Sse.Store(&right.M12,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&left.M11)),
+                            Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&left.M12))),
+                        Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&left.M13)),
+                            Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&left.M14)))));
+                row = Sse.LoadVector128(&right.M13);
+                Sse.Store(&right.M13,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&left.M11)),
+                            Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&left.M12))),
+                        Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&left.M13)),
+                            Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&left.M14)))));
+                row = Sse.LoadVector128(&right.M14);
+                Sse.Store(&right.M14,
+                    Sse.Add(Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0x00), Sse.LoadVector128(&left.M11)),
+                            Sse.Multiply(Sse.Shuffle(row, row, 0x55), Sse.LoadVector128(&left.M12))),
+                        Sse.Add(Sse.Multiply(Sse.Shuffle(row, row, 0xAA), Sse.LoadVector128(&left.M13)),
+                            Sse.Multiply(Sse.Shuffle(row, row, 0xFF), Sse.LoadVector128(&left.M14)))));
+                return right;
+            }
+
             Matrix res;
             res.M11 = left.M11 * right.M11 + left.M12 * right.M21 + left.M13 * right.M31 + left.M14 * right.M41;
             res.M12 = left.M11 * right.M12 + left.M12 * right.M22 + left.M13 * right.M32 + left.M14 * right.M42;
@@ -310,12 +306,13 @@ namespace Aristarete.Basic
                 var valueZ = Vector128.Create(vector.Z);
                 var valueW = Vector128.Create(vector.W);
                 Sse.Store(&result.X, Sse.Add(Sse.Add(Sse.Add(
-                            Sse.Multiply(Sse.LoadVector128(&matrix.M11), valueX), 
+                            Sse.Multiply(Sse.LoadVector128(&matrix.M11), valueX),
                             Sse.Multiply(Sse.LoadVector128(&matrix.M12), valueY)),
                         Sse.Multiply(Sse.LoadVector128(&matrix.M13), valueZ)),
                     Sse.Multiply(Sse.LoadVector128(&matrix.M14), valueW)));
                 return result;
             }
+
             var resultX = matrix.M11 * vector.X + matrix.M12 * vector.Y + matrix.M13 * vector.Z + matrix.M14 * vector.W;
             var resultY = matrix.M21 * vector.X + matrix.M22 * vector.Y + matrix.M23 * vector.Z + matrix.M24 * vector.W;
             var resultZ = matrix.M31 * vector.X + matrix.M32 * vector.Y + matrix.M33 * vector.Z + matrix.M34 * vector.W;
@@ -332,7 +329,6 @@ namespace Aristarete.Basic
                    && left.GetColumn(3) == right.GetColumn(3);
         }
 
-        //*undoc*
         public static bool operator !=(Matrix left, Matrix right)
         {
             // Returns true in the presence of NaN values.
