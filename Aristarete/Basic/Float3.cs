@@ -329,10 +329,10 @@ namespace Aristarete.Basic
         public static Float3 Transform(Float3 vector, float scale, Float3 position, Float3 rotationAxis,
             float angle)
         {
-            var matrixScale = System.Numerics.Matrix4x4.CreateScale(scale);
-            var matrixPosition = System.Numerics.Matrix4x4.CreateTranslation(position.ToBuiltIn());
+            var matrixScale = Matrix4x4.CreateScale(scale);
+            var matrixPosition = Matrix4x4.CreateTranslation(position.ToBuiltIn());
             var matrixRotation =
-                System.Numerics.Matrix4x4.CreateFromAxisAngle(rotationAxis.ToBuiltIn(), angle * MathExtensions.Deg2Rad);
+                Matrix4x4.CreateFromAxisAngle(rotationAxis.ToBuiltIn(), angle * MathExtensions.Deg2Rad);
             var transformMatrix = matrixScale * matrixRotation * matrixPosition;
             return FromBuiltIn(Vector3.Transform(vector.ToBuiltIn(), transformMatrix));
         }

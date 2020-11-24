@@ -1,4 +1,6 @@
-﻿using Aristarete.Basic;
+﻿using System.Collections.Generic;
+using Aristarete.Basic;
+using Aristarete.Extensions;
 using Aristarete.Inputting;
 using Aristarete.Models;
 
@@ -8,18 +10,28 @@ namespace Aristarete.Rendering
     {
         private float _angleLeft;
         private float _angleUp;
-        private bool _switchCamera = true;
+        private float _autoAngle;
         private Float3 _scale = Float3.One;
         private Float3 _translate = Float3.Zero;
-        private Float3 _eye = new Float3(0, 0, 2);
-        private readonly Model _model = new Model("_Resources/crystal.obj");
-        private readonly VertexProcessor _vertexProcessor = new VertexProcessor();
+        private Float3 _cameraRotation = new(0, 0, 3);
+        private Float3 _cameraRotationStart = new(0, 0, 3);
+        private Float3 _cameraRotationStop = new(3, 0, 0);
+        private int _cameraRotationSwitch;
+        private readonly Float3 _eye = new(0, 0, 2);
+        private readonly Model _model = new("_Resources/crystal.obj");
+        private readonly Model _modelGreen = new("_Resources/crystal.obj", "_Resources/crystal_green_diffuse.png");
+        private readonly VertexProcessor _vertexProcessor = new();
+        private readonly List<IRenderable> _renderObjects = new();
 
         public ModelRendering()
         {
-            _vertexProcessor.SetPerspective(60, 1, 1, 1000);
+            _vertexProcessor.SetPerspective(60, 1, 0.1f, 100);
             _vertexProcessor.SetLookAt(_eye, new Float3(0, 0, 0), Float3.Up);
-            _vertexProcessor.SetIdentity();
+            _renderObjects.Add(new RenderObject(_vertexProcessor, _modelGreen));
+            _renderObjects.Add(new RenderObject(_vertexProcessor, _model));
+            _renderObjects.Add(new RenderObject(_vertexProcessor, _model));
+            _renderObjects.Add(new RenderObject(_vertexProcessor, _model));
+            _renderObjects.Add(new CubeObject(_vertexProcessor));
         }
 
         public void Run(Rasterizer rasterizer)
@@ -50,137 +62,74 @@ namespace Aristarete.Rendering
             }
             else if (Input.IsCurrentPress(Keys.A))
             {
-                _translate += Float3.Left / 10f;
+                _translate += Float3.Left / 20f;
             }
             else if (Input.IsCurrentPress(Keys.D))
             {
-                _translate += Float3.Right / 10f;
-            }
-            else if (Input.IsNewPress(Keys.Space))
-            {
-                _switchCamera = !_switchCamera;
+                _translate += Float3.Right / 20f;
             }
 
-            _vertexProcessor.SetIdentity();
+            if (Input.IsCurrentPress(Keys.Space))
+            {
+                _cameraRotation = Float3.Lerp(_cameraRotationStart, _cameraRotationStop, _cameraRotationSwitch++ / 100f);
+                if (_cameraRotation == new Float3(3, 0, 0) && _cameraRotationSwitch > 100)
+                {
+                    _cameraRotationStart = _cameraRotationStop;
+                    _cameraRotationStop = new Float3(0,0,-3);
+                    _cameraRotationSwitch = 0;
+                }
+            }
+
+            _autoAngle++;
+
             _vertexProcessor.SetIdentityToView();
-            _vertexProcessor.SetLookAt(_switchCamera ? new Float3(0, 0, 2) : new Float3(0, -3, 0), new Float3(0, 0, 0),
-                _switchCamera ? Float3.Up : Float3.Forward);
-            
-            _vertexProcessor.Scale(_scale);
-            _vertexProcessor.Translate(_translate);
-            _vertexProcessor.Rotate(_angleLeft, Float3.Up);
-            _vertexProcessor.Rotate(_angleUp, Float3.Left);
-            _vertexProcessor.Translate(_translate);
-            _vertexProcessor.Transform();
-            _vertexProcessor.SetIdentity();
+            _vertexProcessor.SetLookAt(_cameraRotation,
+                new Float3(0, 0, 0),
+                Float3.Up);
 
-            _model.ColorAngle = FloatColor.White;
-            for (var i = 0; i < _model.Faces.Count; i++)
-            {
-                var face = _model.GetFace(i);
-                var screenCoords = new Float3[3];
-                var worldCoords = new Float3[3];
+            _renderObjects[0]
+                .Scale(_scale)
+                .Rotate(_angleUp, Float3.Left)
+                .Translate(_translate)
+                .Rotate(_angleLeft, Float3.Up);
 
-                for (var j = 0; j < 3; j++)
-                {
-                    var v = _model.Vertices[face[j]];
-                    screenCoords[j] = _vertexProcessor.Apply(v);
-                    worldCoords[j] = v;
-                }
+            (_renderObjects[0] as RenderObject)!.Model.ColorAngle = FloatColor.White;
+            _renderObjects[0].Update(rasterizer);
 
-                var uv = new Float2[3];
-                for (var k = 0; k < 3; k++)
-                {
-                    uv[k] = _model.GetUV(i, k);
-                }
+            (_renderObjects[1] as RenderObject)!.Model.ColorAngle = FloatColor.Blue;
+            _renderObjects[1]
+                .Scale(Float3.One / 2f)
+                .Translate(Float3.Left)
+                .Rotate(_autoAngle, Float3.Up);
+            _renderObjects[1].Update(rasterizer);
 
-                rasterizer.Triangle(screenCoords, uv, _model);
-            }
+            (_renderObjects[2] as RenderObject)!.Model.ColorAngle = FloatColor.Red;
+            _renderObjects[2]
+                .Scale(Float3.One)
+                .Rotate(_autoAngle, Float3.Forward)
+                .Translate(Float3.Right + Float3.Back);
+            _renderObjects[2].Update(rasterizer);
 
-            _vertexProcessor.Scale(Float3.One / 2f);
-            _vertexProcessor.Translate(Float3.Left);
-            _vertexProcessor.Transform();
-            _vertexProcessor.SetIdentity();
+            (_renderObjects[3] as RenderObject)!.Model.ColorAngle = FloatColor.White *
+                                                                    MathExtensions.PingPong(
+                                                                        (float) Time.RealGameTime.TotalMilliseconds /
+                                                                        1000, 1);
+            _renderObjects[3]
+                .Scale(Float3.One / 4)
+                .Translate(Float3.Forward / 5 + new Float3(0,MathExtensions.PingPong(
+                    (float) Time.RealGameTime.TotalMilliseconds /
+                    1000, 2) - 1,0))
+                .Rotate(180, Float3.Forward);
+            _renderObjects[3].Update(rasterizer);
 
-            _model.ColorAngle = FloatColor.Blue;
-            for (var i = 0; i < _model.Faces.Count; i++)
-            {
-                var face = _model.GetFace(i);
-                var screenCoords = new Float3[3];
-                var worldCoords = new Float3[3];
-
-                for (var j = 0; j < 3; j++)
-                {
-                    var v = _model.Vertices[face[j]];
-                    screenCoords[j] = _vertexProcessor.Apply(v);
-                    worldCoords[j] = v;
-                }
-
-                var uv = new Float2[3];
-                for (var k = 0; k < 3; k++)
-                {
-                    uv[k] = _model.GetUV(i, k);
-                }
-
-                rasterizer.Triangle(screenCoords, uv, _model);
-            }
-
-            _vertexProcessor.Scale(Float3.One);
-            _vertexProcessor.Rotate(45, Float3.Forward);
-            _vertexProcessor.Translate(Float3.Right + Float3.Back);
-            _vertexProcessor.Transform();
-            _vertexProcessor.SetIdentity();
-
-            _model.ColorAngle = FloatColor.Red;
-            for (var i = 0; i < _model.Faces.Count; i++)
-            {
-                var face = _model.GetFace(i);
-                var screenCoords = new Float3[3];
-                var worldCoords = new Float3[3];
-
-                for (var j = 0; j < 3; j++)
-                {
-                    var v = _model.Vertices[face[j]];
-                    screenCoords[j] = _vertexProcessor.Apply(v);
-                    worldCoords[j] = v;
-                }
-
-                var uv = new Float2[3];
-                for (var k = 0; k < 3; k++)
-                {
-                    uv[k] = _model.GetUV(i, k);
-                }
-
-                rasterizer.Triangle(screenCoords, uv, _model);
-            }
-            
-            _vertexProcessor.Scale(Float3.One/4);
-            _vertexProcessor.Rotate(180, Float3.Forward);
-            _vertexProcessor.Translate(Float3.Forward/5);
-            _vertexProcessor.Transform();
-
-            _model.ColorAngle = FloatColor.Blue;
-            for (var i = 0; i < _model.Faces.Count; i++)
-            {
-                var face = _model.GetFace(i);
-                var screenCoords = new Float3[3];
-                var worldCoords = new Float3[3];
-
-                for (var j = 0; j < 3; j++)
-                {
-                    var v = _model.Vertices[face[j]];
-                    screenCoords[j] = _vertexProcessor.Apply(v);
-                    worldCoords[j] = v;
-                }
-
-                var uv = new Float2[3];
-                for (var k = 0; k < 3; k++)
-                {
-                    uv[k] = _model.GetUV(i, k);
-                }
-
-                rasterizer.Triangle(screenCoords, uv, _model);
-            }
+            var scaleUnit = (MathExtensions.PingPong((float) Time.RealGameTime.TotalMilliseconds / 1000, 1) + 1) / 16;
+            var scale = new Float3(scaleUnit);
+            _renderObjects[4]
+                .Scale(scale)
+                .Rotate(20, Float3.Up)
+                .Rotate(35, Float3.Left)
+                .Translate((Float3.Left + Float3.Up) / 2);
+            _renderObjects[4].Update(rasterizer);
         }
     }
 }

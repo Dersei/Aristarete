@@ -13,12 +13,12 @@ namespace Aristarete.Models
         public List<Float3> Vertices { get; } = new List<Float3>();
         public List<Int3[]> Faces { get; } = new List<Int3[]>();
         public List<Float2> UV { get; } = new List<Float2>();
-        public FloatColor ColorAngle = new FloatColor(1,1,1,1);
+        public FloatColor ColorAngle = new FloatColor(1, 1, 1, 1);
         private uint[]? _diffuseMap;
         private int _mapWidth;
         private int _mapHeight;
 
-        public Model(string filename)
+        public Model(string filename, string textureFileName = "")
         {
             using var stream = new StreamReader(filename);
 
@@ -50,23 +50,19 @@ namespace Aristarete.Models
                 }
             }
 
-            LoadTexture(filename, "_diffuse.png");
+            filename = filename.Split('.')[0];
+            LoadTexture(string.IsNullOrWhiteSpace(textureFileName) ? $"{filename}_diffuse.png" : textureFileName);
         }
 
-        private void LoadTexture(string filename, string suffix)
+        private void LoadTexture(string textureName)
         {
-            var dot = filename.LastIndexOf(".", StringComparison.Ordinal);
-            if (dot != -1)
-            {
-                filename = filename.Substring(0, dot) + suffix;
-                var img = new BitmapImage(new Uri(filename, UriKind.Relative));
-                var wbm = new WriteableBitmap(img);
-                var colors = new uint[wbm.PixelWidth * wbm.PixelHeight];
-                wbm.CopyPixels(colors, wbm.BackBufferStride, 0);
-                _diffuseMap = colors;
-                _mapWidth = wbm.PixelWidth;
-                _mapHeight = wbm.PixelHeight;
-            }
+            var img = new BitmapImage(new Uri(textureName, UriKind.Relative));
+            var wbm = new WriteableBitmap(img);
+            var colors = new uint[wbm.PixelWidth * wbm.PixelHeight];
+            wbm.CopyPixels(colors, wbm.BackBufferStride, 0);
+            _diffuseMap = colors;
+            _mapWidth = wbm.PixelWidth;
+            _mapHeight = wbm.PixelHeight;
         }
 
         public Int3 GetFace(int idx) =>

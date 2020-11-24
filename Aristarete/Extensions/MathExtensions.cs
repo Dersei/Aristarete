@@ -61,6 +61,17 @@ namespace Aristarete.Extensions
             return MathF.Abs(second - first) < MathF.Max(1E-06f * MathF.Max(MathF.Abs(first), MathF.Abs(second)),
                 float.Epsilon * precisionMultiplier);
         }
+        
+        public static float Repeat(float t, float length)
+        {
+            return t - MathF.Floor(t / length) * length;
+        }
+        
+        public static float PingPong(float t, float length)
+        {
+            t = Repeat(t, length * 2f);
+            return length - MathF.Abs(t - length);
+        }
 
         public static bool IsNotZero(this float value) => MathF.Abs(value) > float.Epsilon;
 

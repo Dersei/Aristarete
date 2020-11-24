@@ -16,8 +16,8 @@ namespace Aristarete.Rendering
         private readonly Window _window;
         private readonly Rasterizer _rasterizer;
         private readonly WriteableBitmap _wb;
-        private readonly Label _fpsLabel;
-        private readonly List<IRendering> _renderings = new List<IRendering>();
+        private readonly TextBlock _fpsLabel;
+        private readonly List<IRendering> _renderings = new();
 
         public DisplayWindow(Rasterizer rasterizer, params IRendering[] renderings)
         {
@@ -27,10 +27,10 @@ namespace Aristarete.Rendering
                 null);
             var image = new Image {Source = _wb, Width = _rasterizer.Buffer.Width, Height = _rasterizer.Buffer.Height};
             var canvasPanel = new Canvas {Width = image.Width, Height = image.Height};
-            _fpsLabel = new Label {Content = "FPS", Foreground = Brushes.White};
+            _fpsLabel = new TextBlock {Text = "FPS", Foreground = Brushes.White, FontSize = 24};
             canvasPanel.Children.Add(image);
             canvasPanel.Children.Add(_fpsLabel);
-            _window = new Window {Content = canvasPanel, SizeToContent = SizeToContent.WidthAndHeight};
+            _window = new Window {Content = canvasPanel, SizeToContent = SizeToContent.WidthAndHeight, WindowStartupLocation = WindowStartupLocation.CenterScreen};
             CompositionTarget.Rendering += CompositionTargetOnRendering;
             CompositionTarget.Rendering += FpsCounting;
             CompositionTarget.Rendering += Input.Update;
@@ -40,6 +40,7 @@ namespace Aristarete.Rendering
 
         private void CompositionTargetOnRendering(object? sender, EventArgs e)
         {
+            Time.Update(_stopwatch.Elapsed);
             _rasterizer.Clear();
             foreach (var rendering in _renderings)
             {
@@ -65,7 +66,7 @@ namespace Aristarete.Rendering
 
             if (frameRate > 0)
             {
-                _fpsLabel.Content = frameRate.ToString();
+                _fpsLabel.Text = frameRate.ToString();
             }
         }
 
