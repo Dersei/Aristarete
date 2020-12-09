@@ -1,23 +1,24 @@
 ﻿using Aristarete.Basic;
-using Aristarete.Models;
 
-namespace Aristarete
+namespace Aristarete.Meshes
 {
-    public class RenderObject : IRenderable
+    public abstract class Mesh : IRenderable
     {
+        public Vertex[]? Vertices;
+        public Int3[]? Indices;
         public VertexProcessor VertexProcessor { get; }
-        public Model Model { get; }
+        public FloatColor BasicColor = FloatColor.Error;
         public Matrix Object2World = Matrix.Identity;
         public Matrix Object2Projection = Matrix.Identity;
         public Matrix Object2View = Matrix.Identity;
-        private bool _isDirty= true;
+        private bool _isDirty = true;
 
-        public RenderObject(VertexProcessor vertexProcessor, Model model)
+
+        protected Mesh(VertexProcessor vertexProcessor)
         {
             VertexProcessor = vertexProcessor;
-            Model = model;
         }
-        
+
         public void SetIdentity()
         {
             Object2World = Matrix.Identity;
@@ -42,7 +43,7 @@ namespace Aristarete
             Object2World = Matrix.Scale(v) * Object2World;
             _isDirty = true;
             return this;
-        } 
+        }
         
         public IRenderable Scale(float v)
         {
@@ -65,18 +66,18 @@ namespace Aristarete
             if (_isDirty)
             {
                 Transform();
-                SetIdentity();
+                //SetIdentity();
             }
-           
-            for (var i = 0; i < Model.Faces.Count; i++)
+            
+            for (var i = 0; i < Indices.Length; i++)
             {
-                var face = Model.GetFace(i);
+                var face = Indices[i];
                 var screenCoords = new Float3[3];
                 var worldCoords = new Float3[3];
 
                 for (var j = 0; j < 3; j++)
                 {
-                    var v = Model.Vertices[face[j]];
+                    var v = Vertices[face[j]].Position;
                     screenCoords[j] = Apply(v);
                     worldCoords[j] = v;
                 }
@@ -84,10 +85,15 @@ namespace Aristarete
                 var uv = new Float2[3];
                 for (var k = 0; k < 3; k++)
                 {
-                    uv[k] = Model.GetUV(i, k);
+                    uv[k] = Float2.Zero;
                 }
 
-                rasterizer.Triangle(screenCoords, uv, Model);
+                rasterizer.Triangle(screenCoords, new[]
+                {
+                    FloatColor.Green,
+                    FloatColor.Red,
+                    FloatColor.Blue
+                });
             }
         }
     }

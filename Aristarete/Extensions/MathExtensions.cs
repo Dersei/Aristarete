@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Numerics;
+using Aristarete.Basic;
 
 namespace Aristarete.Extensions
 {
@@ -76,5 +78,35 @@ namespace Aristarete.Extensions
         public static bool IsNotZero(this float value) => MathF.Abs(value) > float.Epsilon;
 
         public static bool IsAboutZero(this float value) => MathF.Abs(value) < float.Epsilon;
+        
+        public static Quaternion AngleAxis(float aAngle, Float3 aAxis)
+        {
+            aAxis.Normalize();
+            var rad = aAngle * Deg2Rad * 0.5f;
+            aAxis *= MathF.Sin(rad);
+            return new Quaternion(aAxis.X, aAxis.Y, aAxis.Z, MathF.Cos(rad));
+        }
+        
+        public static Vector3 Rotate(Quaternion rotation, Vector3 point)
+        {
+            var x = rotation.X * 2F;
+            var y = rotation.Y * 2F;
+            var z = rotation.Z * 2F;
+            var xx = rotation.X * x;
+            var yy = rotation.Y * y;
+            var zz = rotation.Z * z;
+            var xy = rotation.X * y;
+            var xz = rotation.X * z;
+            var yz = rotation.Y * z;
+            var wx = rotation.W * x;
+            var wy = rotation.W * y;
+            var wz = rotation.W * z;
+
+            Vector3 res;
+            res.X = (1F - (yy + zz)) * point.X + (xy - wz) * point.Y + (xz + wy) * point.Z;
+            res.Y = (xy + wz) * point.X + (1F - (xx + zz)) * point.Y + (yz - wx) * point.Z;
+            res.Z = (xz - wy) * point.X + (yz + wx) * point.Y + (1F - (xx + yy)) * point.Z;
+            return res;
+        }
     }
 }

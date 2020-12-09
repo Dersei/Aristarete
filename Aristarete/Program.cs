@@ -9,10 +9,10 @@ namespace Aristarete
         [STAThread]
         private static void Main()
         {
-            var buffer = new Buffer(960, 960);
+            var buffer = new Buffer(1440 , 720);
             buffer.Clear(FloatColor.Black);
             var rasterizer = new Rasterizer(buffer);
-            var displayWindow = new DisplayWindow(rasterizer, new ModelRendering());
+            var displayWindow = new DisplayWindow(rasterizer, new GeneratedRendering());
             displayWindow.Display();
         }
     }

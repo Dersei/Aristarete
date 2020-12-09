@@ -40,6 +40,13 @@ namespace Aristarete
             _isDirty = true;
             return this;
         }
+        
+        public IRenderable Scale(float v)
+        {
+            Object2World = Matrix.Scale(new Float3(v)) * Object2World;
+            _isDirty = true;
+            return this;
+        } 
 
         public void Transform()
         {

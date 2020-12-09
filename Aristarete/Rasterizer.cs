@@ -116,6 +116,7 @@ namespace Aristarete
                 }
             }
         }
+        
 
         private readonly struct BarycentricHelper
         {
