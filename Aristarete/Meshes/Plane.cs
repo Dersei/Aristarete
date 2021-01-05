@@ -6,11 +6,17 @@ namespace Aristarete.Meshes
     {
         public Plane(VertexProcessor vertexProcessor) : base(vertexProcessor)
         {
-            var length = 1f;
-            var width = 1f;
-            var resX = 2; // 2 minimum
-            var resZ = 2;
+            Create();
+        }
 
+        public Plane(VertexProcessor vertexProcessor, float length = 1, float width = 1, int resX = 2, int resZ = 2) :
+            base(vertexProcessor)
+        {
+            Create(length, width, resX, resZ);
+        }
+
+        private void Create(float length = 1, float width = 1, int resX = 2, int resZ = 2)
+        {
             Vertex[] vertices = new Vertex[resX * resZ];
             for (var z = 0; z < resZ; z++)
             {
@@ -46,6 +52,11 @@ namespace Aristarete.Meshes
             for (var j = 0; j < size; j++)
             {
                 indices[j] = new Int3(triangles[j * 3], triangles[j * 3 + 1], triangles[j * 3 + 2]);
+            }
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                // vertices[i].Normal = vertices[1]
             }
 
             Vertices = vertices;

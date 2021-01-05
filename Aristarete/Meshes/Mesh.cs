@@ -1,18 +1,22 @@
-﻿using Aristarete.Basic;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using Aristarete.Basic;
+using Aristarete.Lighting;
 
 namespace Aristarete.Meshes
 {
     public abstract class Mesh : IRenderable
     {
-        public Vertex[]? Vertices;
-        public Int3[]? Indices;
+        public Vertex[] Vertices = null!;
+        public Int3[] Indices = null!;
         public VertexProcessor VertexProcessor { get; }
         public FloatColor BasicColor = FloatColor.Error;
         public Matrix Object2World = Matrix.Identity;
         public Matrix Object2Projection = Matrix.Identity;
         public Matrix Object2View = Matrix.Identity;
         private bool _isDirty = true;
-
+        public bool VertexLight = false;
+        public bool LifeUpdate = false;
 
         protected Mesh(VertexProcessor vertexProcessor)
         {
@@ -44,13 +48,13 @@ namespace Aristarete.Meshes
             _isDirty = true;
             return this;
         }
-        
+
         public IRenderable Scale(float v)
         {
             Object2World = Matrix.Scale(new Float3(v)) * Object2World;
             _isDirty = true;
             return this;
-        } 
+        }
 
         public void Transform()
         {
@@ -61,14 +65,18 @@ namespace Aristarete.Meshes
 
         public Float3 Apply(Float3 f) => Object2Projection.MultiplyPoint(f);
 
+        public Float3 ApplyView(Float3 f) => Object2View.MultiplyPoint(f);
+
+        public Float3 TransformNormals(Float3 f) => Object2View.MultiplyVector(f);
+
         public void Update(Rasterizer rasterizer)
         {
             if (_isDirty)
             {
                 Transform();
-                //SetIdentity();
+                if(LifeUpdate) SetIdentity();
             }
-            
+
             for (var i = 0; i < Indices.Length; i++)
             {
                 var face = Indices[i];
@@ -88,13 +96,69 @@ namespace Aristarete.Meshes
                     uv[k] = Float2.Zero;
                 }
 
-                rasterizer.Triangle(screenCoords, new[]
+                var colorA = FloatColor.Black;
+                var colorB = FloatColor.Black;
+                var colorC = FloatColor.Black;
+
+                foreach (var light in Statics.Lights)
                 {
-                    FloatColor.Green,
-                    FloatColor.Red,
-                    FloatColor.Blue
-                });
+                    colorA += light.Calculate(Vertices[Indices[i].X], this);
+                    colorB += light.Calculate(Vertices[Indices[i].Y], this);
+                    colorC += light.Calculate(Vertices[Indices[i].Z], this);
+                }
+
+                if (VertexLight)
+                {
+                    rasterizer.TriangleVertices(
+                        screenCoords,
+                        new[]
+                        {
+                            colorA * BasicColor, colorB * BasicColor, colorC * BasicColor
+                        });
+                }
+                else
+                {
+                    rasterizer.Triangle(new[]
+                        {
+                            Vertices[Indices[i].X],
+                            Vertices[Indices[i].Y],
+                            Vertices[Indices[i].Z]
+                        },
+                        screenCoords,
+                        new[]
+                        {
+                            BasicColor, BasicColor, BasicColor
+                            // FloatColor.FromNormal(Vertices[Indices[i].X].Normal),
+                            // FloatColor.FromNormal(Vertices[Indices[i].Y].Normal),
+                            // FloatColor.FromNormal(Vertices[Indices[i].Z].Normal)
+                        }, this);
+                }
             }
+        }
+
+        public Mesh CreateNormals()
+        {
+            for (int i = 0; i < Vertices.Length; i++)
+            {
+                Vertices[i].Normal = Float3.Zero;
+            }
+
+            for (int i = 0; i < Indices.Length; i++)
+            {
+                var n = (Vertices[Indices[i].Y].Position - Vertices[Indices[i].X].Position).Cross(
+                    Vertices[Indices[i].Z].Position - Vertices[Indices[i].X].Position);
+
+                Vertices[Indices[i].X].Normal += n;
+                Vertices[Indices[i].Y].Normal += n;
+                Vertices[Indices[i].Z].Normal += n;
+            }
+
+            for (int i = 0; i < Vertices.Length; i++)
+            {
+                Vertices[i].Normal = Float3.Normalize(Vertices[i].Normal);
+            }
+
+            return this;
         }
     }
 }

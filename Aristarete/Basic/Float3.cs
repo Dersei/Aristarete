@@ -398,5 +398,10 @@ namespace Aristarete.Basic
         public void Deconstruct(out float x, out float y, out float z) => (x, y, z) = (X, Y, Z);
         
         public Float2 XY => new Float2(X,Y);
+
+        public FloatColor ToFloatColor()
+        {
+            return new FloatColor(X, Y, Z, 1);
+        }
     }
 }

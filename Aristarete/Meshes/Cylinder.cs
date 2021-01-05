@@ -28,10 +28,12 @@ namespace Aristarete.Meshes
             var currentRadius = bottomRadius;
 
             Vertex[] cylinderVertices = new Vertex[vertexCount];
+            Float3[] cylinderNormals = new Float3[vertexCount];
 
             // Start at the bottom of the cylinder            
             var currentVertex = 0;
             cylinderVertices[currentVertex] = new Float3(0, currentHeight, 0);
+            cylinderNormals[currentVertex] = Float3.Down;
             currentVertex++;
             for (var i = 0; i <= stacks; i++)
             {
@@ -44,6 +46,7 @@ namespace Aristarete.Meshes
 
                     var position = new Float3(x, y, z);
                     cylinderVertices[currentVertex] = position;
+                    cylinderNormals[currentVertex] = Float3.Normalize(position);
                     currentVertex++;
 
                     sliceAngle += sliceStep;
@@ -54,7 +57,8 @@ namespace Aristarete.Meshes
             }
 
             cylinderVertices[currentVertex] = new Float3(0, length / 2, 0);
-
+            cylinderNormals[currentVertex] = Float3.Up;
+            
             var triangles = CreateIndexBuffer(vertexCount, indexCount, slices);
 
             var size = triangles.Length / 3;
@@ -62,6 +66,11 @@ namespace Aristarete.Meshes
             for (var j = 0; j < size; j++)
             {
                 indices[j] = new Int3(triangles[j * 3], triangles[j * 3 + 1], triangles[j * 3 + 2]);
+            }
+
+            for (int i = 0; i < cylinderVertices.Length; i++)
+            {
+                cylinderVertices[i].Normal = cylinderNormals[i];
             }
 
             Vertices = cylinderVertices;

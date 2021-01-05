@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Aristarete.Basic;
 using Aristarete.Extensions;
 using Aristarete.Inputting;
+using Aristarete.Lighting;
+using Aristarete.Meshes;
 using Aristarete.Models;
 
 namespace Aristarete.Rendering
@@ -25,13 +28,23 @@ namespace Aristarete.Rendering
 
         public ModelRendering()
         {
-            _vertexProcessor.SetPerspective(60, 1, 0.1f, 100);
+            _vertexProcessor.SetPerspective(60, 2, 0.1f, 100);
             _vertexProcessor.SetLookAt(_eye, new Float3(0, 0, 0), Float3.Up);
             _renderObjects.Add(new RenderObject(_vertexProcessor, _modelGreen));
             _renderObjects.Add(new RenderObject(_vertexProcessor, _model));
             _renderObjects.Add(new RenderObject(_vertexProcessor, _model));
             _renderObjects.Add(new RenderObject(_vertexProcessor, _model));
-            _renderObjects.Add(new CubeObject(_vertexProcessor));
+            _renderObjects.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.White}.CreateNormals());
+            
+            
+            Statics.Lights.Add(new DirectionalLight
+            {
+                Position = Float3.Forward.Normalize(),
+                Ambient = FloatColor.Black,
+                Diffuse = FloatColor.Red,
+                Specular = FloatColor.White,
+                Shininess = 32
+            });
         }
 
         public void Run(Rasterizer rasterizer)
@@ -86,30 +99,30 @@ namespace Aristarete.Rendering
             _vertexProcessor.SetLookAt(_cameraRotation,
                 new Float3(0, 0, 0),
                 Float3.Up);
-
+            
             _renderObjects[0]
                 .Scale(_scale)
                 .Rotate(_angleUp, Float3.Left)
                 .Translate(_translate)
                 .Rotate(_angleLeft, Float3.Up);
-
+            
             (_renderObjects[0] as RenderObject)!.Model.ColorAngle = FloatColor.White;
             _renderObjects[0].Update(rasterizer);
-
+            
             (_renderObjects[1] as RenderObject)!.Model.ColorAngle = FloatColor.Blue;
             _renderObjects[1]
                 .Scale(Float3.One / 2f)
                 .Translate(Float3.Left)
                 .Rotate(_autoAngle, Float3.Up);
             _renderObjects[1].Update(rasterizer);
-
+            
             (_renderObjects[2] as RenderObject)!.Model.ColorAngle = FloatColor.Red;
             _renderObjects[2]
                 .Scale(Float3.One)
                 .Rotate(_autoAngle, Float3.Forward)
                 .Translate(Float3.Right + Float3.Back);
             _renderObjects[2].Update(rasterizer);
-
+            
             (_renderObjects[3] as RenderObject)!.Model.ColorAngle = FloatColor.White *
                                                                     MathExtensions.PingPong(
                                                                         (float) Time.RealGameTime.TotalMilliseconds /
@@ -127,7 +140,7 @@ namespace Aristarete.Rendering
             _renderObjects[4]
                 .Scale(scale)
                 .Rotate(20, Float3.Up)
-                .Rotate(35, Float3.Left)
+                .Rotate(35f, Float3.Left)
                 .Translate((Float3.Left + Float3.Up) / 2);
             _renderObjects[4].Update(rasterizer);
         }

@@ -67,7 +67,7 @@ namespace Aristarete.Basic
         {
             return new FloatColor(r / 255f, g / 255f, b / 255f, a / 255f);
         }
-        
+
         public static FloatColor FromArgb(int a, int r, int g, int b)
         {
             return new FloatColor(r / 255f, g / 255f, b / 255f, a / 255f);
@@ -81,8 +81,8 @@ namespace Aristarete.Basic
             var a = (byte) ((color >> 24) & 255);
             return FromRgba(r, g, b, a);
         }
-        
-        
+
+
         public static FloatColor FromArgb(uint color)
         {
             var b = (byte) ((color >> 0) & 255);
@@ -131,10 +131,12 @@ namespace Aristarete.Basic
         /// (0,0,0,0)
         /// </summary>
         public static FloatColor Black = new FloatColor(0, 0, 0);
+
         /// <summary>
         /// (1,1,1,1)
         /// </summary>
         public static FloatColor White = new FloatColor(1, 1, 1);
+
         public static FloatColor Grey = new FloatColor(0.5f, 0.5f, 0.5f);
         public static FloatColor Red = new FloatColor(1, 0, 0);
         public static FloatColor Blue = new FloatColor(0, 0, 1);
@@ -196,5 +198,15 @@ namespace Aristarete.Basic
                 3 => A,
                 _ => throw new IndexOutOfRangeException("Invalid Color index(" + index + ")!")
             };
+
+        public static FloatColor FromNormal(Float3 normal)
+        {
+            var converted = (normal + Float3.One) / 2;
+            return new FloatColor(converted.X, converted.Y, converted.Z);
+        }
+
+        public static FloatColor AlphaToOne(FloatColor color) => new(color.R, color.G, color.B);
+        public FloatColor AlphaToOne() => new(R, G, B);
+        public FloatColor WithAlpha(float a) => new(R, G, B, a);
     }
 }

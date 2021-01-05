@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
@@ -16,6 +17,10 @@ namespace Aristarete.Imaging
             PngBitmapEncoder encoder = new PngBitmapEncoder();
             encoder.Frames.Add(BitmapFrame.Create(wb));
             encoder.Save(stream);
+            var window = new Window();
+            var image = new Image {Source = wb};
+            window.Content = image;
+            window.ShowDialog();
         }
     }
 }

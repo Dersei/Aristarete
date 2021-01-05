@@ -41,6 +41,8 @@ namespace Aristarete.Meshes
 
             vertices[^1] = Float3.Up * -radius;
 
+            for( int n = 0; n < vertices.Length; n++ )
+                vertices[n].Normal = vertices[n].Position.Normalize();
 
             var nbFaces = vertices.Length;
             var nbTriangles = nbFaces * 2;

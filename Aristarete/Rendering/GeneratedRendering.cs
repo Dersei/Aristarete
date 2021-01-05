@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Aristarete.Basic;
 using Aristarete.Inputting;
+using Aristarete.Lighting;
 using Aristarete.Meshes;
 
 namespace Aristarete.Rendering
@@ -17,24 +18,61 @@ namespace Aristarete.Rendering
 
         public GeneratedRendering()
         {
-            _vertexProcessor.SetPerspective(45, 2, 1, 1000);
-            _vertexProcessor.SetLookAt(new Float3(0, 0, 5), new Float3(0, 0, -1), Float3.Up);
-            _meshes.Add(new Pyramid(_vertexProcessor) {BasicColor = FloatColor.Red}
-                .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Left + Float3.Left / 2));
-            _meshes.Add(new Cone(_vertexProcessor) {BasicColor = FloatColor.UnityYellow}
-                .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Left / 2));
-            _meshes.Add(new Sphere(_vertexProcessor) {BasicColor = FloatColor.Green}
-                .Scale(0.3f).Rotate(45, Float3.Left).Translate(Float3.Right / 2));
-            _meshes.Add(new Cylinder(_vertexProcessor) {BasicColor = FloatColor.Blue}
-                .Scale(0.3f).Rotate(45, Float3.Left).Translate(2 * Float3.Left + Float3.Left / 2));
-            _meshes.Add(new Torus(_vertexProcessor) {BasicColor = FloatColor.Magenta}
-                .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Right + Float3.Right / 2));
-            _meshes.Add(new Tube(_vertexProcessor) {BasicColor = FloatColor.White}
-                .Scale(0.3f).Rotate(70, Float3.Left).Translate(2 * Float3.Right + Float3.Right / 2));
-            _meshes.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.Grey}
-                .Scale(0.3f).Rotate(30, Float3.Left).Translate(3 * Float3.Right + Float3.Right / 2));
-            _meshes.Add(new Plane(_vertexProcessor) {BasicColor = FloatColor.Cyan}
-                .Scale(0.3f).Rotate(70, Float3.Left).Translate(3 * Float3.Left + Float3.Left / 2));
+            _vertexProcessor.SetPerspective(45, 2, 0.1f, 100);
+            _vertexProcessor.SetLookAt(new Float3(0, 0, 5), new Float3(0, 0, 0), Float3.Up);
+            _meshes.Add(new Pyramid(_vertexProcessor) {BasicColor = FloatColor.Red}.CreateNormals()
+                .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Right / 2 + Float3.Up));
+
+            _meshes.Add(new Cone(_vertexProcessor) {BasicColor = FloatColor.UnityYellow}.CreateNormals()
+                .Scale(0.3f).Rotate(30, Float3.Left).Translate(1.5f * Float3.Right + Float3.Up));
+
+            _meshes.Add(new Sphere(_vertexProcessor) {BasicColor = FloatColor.Green}.CreateNormals()
+                .Scale(0.3f).Translate(Float3.Left / 2 + Float3.Up));
+
+            _meshes.Add(new Sphere(_vertexProcessor, 1, 8, 6) {BasicColor = FloatColor.White}.CreateNormals()
+                .Scale(0.6f).Translate(Float3.Left));
+            _meshes.Add(new Sphere(_vertexProcessor, 1, 8, 6) {BasicColor = FloatColor.White, VertexLight = true}.CreateNormals()
+                .Scale(0.6f).Translate(Float3.Right));
+            _meshes.Add(new Sphere(_vertexProcessor, 1, 8, 6) {BasicColor = FloatColor.White}.CreateNormals()
+                .Scale(0.6f).Translate(Float3.Right * 3));
+            _meshes.Add(new Sphere(_vertexProcessor, 1, 8, 6) {BasicColor = FloatColor.White, VertexLight = true}.CreateNormals()
+                .Scale(0.6f).Translate(Float3.Left * 3));
+
+            _meshes.Add(new Cylinder(_vertexProcessor) {BasicColor = FloatColor.Blue}.CreateNormals()
+                .Scale(0.3f).Rotate(45, Float3.Left).Translate(1.5f * Float3.Left + Float3.Up));
+
+            _meshes.Add(new Torus(_vertexProcessor) {BasicColor = FloatColor.Magenta}.CreateNormals()
+                .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Right / 2 + Float3.Down));
+
+            _meshes.Add(new Tube(_vertexProcessor) {BasicColor = FloatColor.White}.CreateNormals()
+                .Scale(0.3f).Rotate(90, Float3.Right).Translate(1.5f * Float3.Right + Float3.Down));
+
+            _meshes.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.Grey}.CreateNormals()
+                .Scale(0.3f).Rotate(45, Float3.Up).Translate(Float3.Left / 2 + Float3.Down));
+
+            _meshes.Add(new Plane(_vertexProcessor) {BasicColor = FloatColor.Cyan}.CreateNormals()
+                .Scale(0.3f).Rotate(90, Float3.Forward).Translate(1.5f * Float3.Left + Float3.Down));
+
+            // _meshes.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.Grey}.CreateNormals()
+            //     .Scale(0.3f).Rotate(30, Float3.Up + Float3.Left + Float3.Down));
+
+            Statics.Lights.Add(new DirectionalLight
+            {
+                Position = Float3.Left.Normalize(),
+                Ambient = FloatColor.Black,
+                Diffuse = FloatColor.Red,
+                Specular = FloatColor.White,
+                Shininess = 32
+            });
+            
+            Statics.Lights.Add(new PointLight
+            {
+                Position = Float3.Back * 5 + Float3.Right * 2,
+                Ambient = FloatColor.Black,
+                Diffuse = FloatColor.Blue,
+                Specular = FloatColor.UnityYellow,
+                Shininess = 32
+            });
         }
 
         public void Run(Rasterizer rasterizer)

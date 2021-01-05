@@ -59,6 +59,7 @@ namespace Aristarete
         }
 
         public Float3 Apply(Float3 f) => Object2Projection.MultiplyPoint(f);
+        public Float3 ApplyView(Float3 f) => Object2View.MultiplyPoint(f);
 
         public void Update(Rasterizer rasterizer)
         {

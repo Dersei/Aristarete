@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Aristarete.Basic;
 
 namespace Aristarete.Extensions
@@ -63,12 +64,12 @@ namespace Aristarete.Extensions
             return MathF.Abs(second - first) < MathF.Max(1E-06f * MathF.Max(MathF.Abs(first), MathF.Abs(second)),
                 float.Epsilon * precisionMultiplier);
         }
-        
+
         public static float Repeat(float t, float length)
         {
             return t - MathF.Floor(t / length) * length;
         }
-        
+
         public static float PingPong(float t, float length)
         {
             t = Repeat(t, length * 2f);
@@ -78,7 +79,7 @@ namespace Aristarete.Extensions
         public static bool IsNotZero(this float value) => MathF.Abs(value) > float.Epsilon;
 
         public static bool IsAboutZero(this float value) => MathF.Abs(value) < float.Epsilon;
-        
+
         public static Quaternion AngleAxis(float aAngle, Float3 aAxis)
         {
             aAxis.Normalize();
@@ -86,7 +87,7 @@ namespace Aristarete.Extensions
             aAxis *= MathF.Sin(rad);
             return new Quaternion(aAxis.X, aAxis.Y, aAxis.Z, MathF.Cos(rad));
         }
-        
+
         public static Vector3 Rotate(Quaternion rotation, Vector3 point)
         {
             var x = rotation.X * 2F;
@@ -107,6 +108,18 @@ namespace Aristarete.Extensions
             res.Y = (xy + wz) * point.X + (1F - (xx + zz)) * point.Y + (yz - wx) * point.Z;
             res.Z = (xz - wy) * point.X + (yz + wx) * point.Y + (1F - (xx + yy)) * point.Z;
             return res;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float Saturate(float value)
+        {
+            return Clamp01(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static FloatColor Saturate(FloatColor value)
+        {
+            return new(Clamp01(value.R), Clamp01(value.G), Clamp01(value.B), Clamp01(value.A));
         }
     }
 }

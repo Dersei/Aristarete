@@ -9,7 +9,7 @@ namespace Aristarete
         [STAThread]
         private static void Main()
         {
-            var buffer = new Buffer(1440 , 720);
+            var buffer = new Buffer(1440, 720);
             buffer.Clear(FloatColor.Black);
             var rasterizer = new Rasterizer(buffer);
             var displayWindow = new DisplayWindow(rasterizer, new GeneratedRendering());

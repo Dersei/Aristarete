@@ -61,6 +61,7 @@ namespace Aristarete.Basic
         public float Length => MathF.Sqrt(X * X + Y * Y + Z * Z + W * W);
 
         public float LengthSquared => X * X + Y * Y + Z * Z + W * W;
+        public Float3 XYZ => new Float3(X, Y, Z);
 
         #region Operators
 
@@ -347,5 +348,7 @@ namespace Aristarete.Basic
         public static implicit operator (float x, float y, float z, float w)(Float4 v) => (v.X, v.Y, v.Z, v.W);
 
         public void Deconstruct(out float x, out float y, out float z, out float w) => (x, y, z, w) = (X, Y, Z, W);
+
+        public FloatColor ToFloatColor() => new FloatColor(X, Y, Z, 1);
     }
 }

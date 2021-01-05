@@ -70,7 +70,7 @@ namespace Aristarete.Meshes
         {
             Create(1, 1, 1);
         }
-        
+
         public Cube(VertexProcessor vertexProcessor, float length, float width, float height) : base(vertexProcessor)
         {
             Create(length, width, height);

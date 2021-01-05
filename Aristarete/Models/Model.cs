@@ -11,6 +11,7 @@ namespace Aristarete.Models
     public class Model
     {
         public List<Float3> Vertices { get; } = new List<Float3>();
+        public List<Float3> Normals { get; } = new List<Float3>();
         public List<Int3[]> Faces { get; } = new List<Int3[]>();
         public List<Float2> UV { get; } = new List<Float2>();
         public FloatColor ColorAngle = new FloatColor(1, 1, 1, 1);
@@ -48,8 +49,18 @@ namespace Aristarete.Models
                         .Select(v => float.Parse(v, CultureInfo.InvariantCulture)).ToArray();
                     UV.Add(new Float2(array[0], array[1]));
                 }
+                else if (line.StartsWith("vn "))
+                {
+                    var array = line.Split(" ", StringSplitOptions.RemoveEmptyEntries).Skip(1)
+                        .Select(v => float.Parse(v, CultureInfo.InvariantCulture))
+                        .ToArray();
+                    Normals.Add(new Float3(array[0], array[1], array[2]));
+                }
             }
 
+            Console.WriteLine(Normals.Count);
+            Console.WriteLine(Vertices.Count);
+            Console.WriteLine(Faces.Sum(a => a.Length));
             filename = filename.Split('.')[0];
             LoadTexture(string.IsNullOrWhiteSpace(textureFileName) ? $"{filename}_diffuse.png" : textureFileName);
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using Aristarete.Basic;
+using Aristarete.Meshes;
 using Aristarete.Models;
 
 namespace Aristarete
@@ -11,15 +12,15 @@ namespace Aristarete
 
         private readonly int _width;
         private readonly int _height;
-        private readonly float[] _zBuffer;
+        public readonly float[] ZBuffer;
 
         public Rasterizer(Buffer buffer)
         {
             Buffer = buffer;
             _width = buffer.Width;
             _height = buffer.Height;
-            _zBuffer = new float[_width * _height];
-            Array.Fill(_zBuffer, float.MaxValue);
+            ZBuffer = new float[_width * _height];
+            Array.Fill(ZBuffer, float.MaxValue);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -29,7 +30,66 @@ namespace Aristarete
                 (int) ((-originalCoord.Y + 1.0f) * _height * 0.5f), originalCoord.Z);
         }
 
-        public void Triangle(Float3[] vertices, FloatColor[] color)
+        public void Triangle(Vertex[] vertices, Float3[] screenCords, FloatColor[] color, IRenderable mesh)
+        {
+            screenCords[0] = ToBufferCoords(screenCords[0]);
+            screenCords[1] = ToBufferCoords(screenCords[1]);
+            screenCords[2] = ToBufferCoords(screenCords[2]);
+
+            var bBoxMin = new Float2(float.MaxValue, float.MaxValue);
+            var bBoxMax = new Float2(float.MinValue, float.MinValue);
+            var clamp = new Float2(_width - 1, _height - 1);
+
+            for (var i = 0; i < 3; i++)
+            {
+                bBoxMin = Float2.MinAbsolute(bBoxMin, screenCords[i].XY);
+                bBoxMax = Float2.MaxClamped(bBoxMax, screenCords[i].XY, clamp);
+            }
+
+            var barycentricHelper = new BarycentricHelper(screenCords[0], screenCords[1], screenCords[2]);
+
+            for (var x = bBoxMin.X; x <= bBoxMax.X; x++)
+            {
+                for (var y = bBoxMin.Y; y <= bBoxMax.Y; y++)
+                {
+                    var barycentric = barycentricHelper.Calculate(x, y);
+                    if (barycentric.X < 0 || barycentric.Y < 0 || barycentric.Z < 0) continue;
+                    float z = 0;
+                    z += 1f / screenCords[0].Z * barycentric.X;
+                    z += 1f / screenCords[1].Z * barycentric.Y;
+                    z += 1f / screenCords[2].Z * barycentric.Z;
+                    z = 1f / z;
+                    var zCoord = (int) (x + y * _width);
+                    if (z < ZBuffer[zCoord])
+                    {
+                        ZBuffer[zCoord] = z;
+                        if (barycentricHelper.FirstEdge || barycentricHelper.SecondEdge || barycentricHelper.ThirdEdge)
+                        {
+                            var vertex = new Vertex
+                            {
+                                Position = vertices[0].Position * barycentric.X + vertices[1].Position * barycentric.Y +
+                                           vertices[2].Position * barycentric.Z,
+                                Normal = vertices[0].Normal * barycentric.X + vertices[1].Normal * barycentric.Y +
+                                         vertices[2].Normal * barycentric.Z,
+                            };
+
+                            var colorLight = FloatColor.Black;
+                            foreach (var light in Statics.Lights)
+                            {
+                                colorLight += light.Calculate(vertex, mesh);
+                            }
+
+                            Buffer[(int) x, (int) y] =
+                                color[0] * colorLight * barycentric.X + color[1] * colorLight * barycentric.Y +
+                                color[2] * colorLight * barycentric.Z;
+                        }
+                    }
+                }
+            }
+        }
+
+
+        public void TriangleVertices(Float3[] vertices, FloatColor[] color)
         {
             vertices[0] = ToBufferCoords(vertices[0]);
             vertices[1] = ToBufferCoords(vertices[1]);
@@ -59,9 +119,9 @@ namespace Aristarete
                     z += 1f / vertices[2].Z * barycentric.Z;
                     z = 1f / z;
                     var zCoord = (int) (x + y * _width);
-                    if (z < _zBuffer[zCoord])
+                    if (z < ZBuffer[zCoord])
                     {
-                        _zBuffer[zCoord] = z;
+                        ZBuffer[zCoord] = z;
                         if (barycentricHelper.FirstEdge || barycentricHelper.SecondEdge || barycentricHelper.ThirdEdge)
                             Buffer[(int) x, (int) y] = color[0] * barycentric.X + color[1] * barycentric.Y +
                                                        color[2] * barycentric.Z;
@@ -102,9 +162,9 @@ namespace Aristarete
                     z += 1f / vertices[2].Z * barycentric.Z;
                     z = 1f / z;
                     var zCoord = (int) (x + y * _width);
-                    if (z < _zBuffer[zCoord])
+                    if (z < ZBuffer[zCoord])
                     {
-                        _zBuffer[zCoord] = z;
+                        ZBuffer[zCoord] = z;
 
                         if (barycentricHelper.FirstEdge || barycentricHelper.SecondEdge || barycentricHelper.ThirdEdge)
                         {
@@ -116,7 +176,7 @@ namespace Aristarete
                 }
             }
         }
-        
+
 
         private readonly struct BarycentricHelper
         {
@@ -172,7 +232,7 @@ namespace Aristarete
         public void Clear()
         {
             Buffer.Clear(FloatColor.Black);
-            Array.Fill(_zBuffer, float.MaxValue);
+            Array.Fill(ZBuffer, float.MaxValue);
         }
     }
 }
