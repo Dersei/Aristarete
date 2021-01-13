@@ -41,8 +41,18 @@ namespace Aristarete.Meshes
 
             vertices[^1] = Float3.Up * -radius;
 
-            for( int n = 0; n < vertices.Length; n++ )
+            for (var n = 0; n < vertices.Length; n++)
+            {
                 vertices[n].Normal = vertices[n].Position.Normalize();
+            }
+
+            Float2[] uvs = new Float2[vertices.Length];
+            uvs[0] = Float2.Up;
+            uvs[^1] = Float2.Zero;
+            for (var lat = 0; lat < latitude; lat++)
+            for (var lon = 0; lon <= length; lon++)
+                uvs[lon + lat * (length + 1) + 1] =
+                    new Float2((float) lon / length, 1f - (float) (lat + 1) / (latitude + 1));
 
             var nbFaces = vertices.Length;
             var nbTriangles = nbFaces * 2;
@@ -93,6 +103,7 @@ namespace Aristarete.Meshes
 
             Vertices = vertices;
             Indices = indices;
+            UVs = uvs;
         }
     }
 }

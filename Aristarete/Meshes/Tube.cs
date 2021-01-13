@@ -173,6 +173,46 @@ namespace Aristarete.Meshes
 
                 sideCounter++;
             }
+            
+            Float2[] uvs = new Float2[vertices.Length];
+ 
+            vert = 0;
+// Bottom cap
+            sideCounter = 0;
+            while( vert < verticesCap )
+            {
+                float t = (float)(sideCounter++) / sides;
+                uvs[ vert++ ] = new Float2( 0f, t );
+                uvs[ vert++ ] = new Float2( 1f, t );
+            }
+ 
+// Top cap
+            sideCounter = 0;
+            while( vert < verticesCap * 2 )
+            {
+                float t = (float)(sideCounter++) / sides;
+                uvs[ vert++ ] = new Float2( 0f, t );
+                uvs[ vert++ ] = new Float2( 1f, t );
+            }
+ 
+// Sides (out)
+            sideCounter = 0;
+            while (vert < verticesCap * 2 + verticesSides )
+            {
+                float t = (float)(sideCounter++) / sides;
+                uvs[ vert++ ] = new Float2( t, 0f );
+                uvs[ vert++ ] = new Float2( t, 1f );
+            }
+ 
+// Sides (in)
+            sideCounter = 0;
+            while (vert < vertices.Length )
+            {
+                float t = (float)(sideCounter++) / sides;
+                uvs[ vert++ ] = new Float2( t, 0f );
+                uvs[ vert++ ] = new Float2( t, 1f );
+            }
+
 
             var size = triangles.Length / 3;
             Int3[] indices = new Int3[size];
@@ -182,6 +222,7 @@ namespace Aristarete.Meshes
             }
 
             Vertices = vertices;
+            UVs = uvs;
             Indices = indices;
         }
     }

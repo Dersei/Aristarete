@@ -33,7 +33,11 @@ namespace Aristarete.Basic
 
         public static readonly Float2 Zero = new Float2();
         public static readonly Float2 One = new Float2(1, 1);
-
+        public static readonly Float2 Up = new Float2(0, 1);
+        public static readonly Float2 Down = new Float2(0, -1);
+        public static readonly Float2 Left = new Float2(-1F, 0F);
+        public static readonly Float2 Right = new Float2(1F, 0F);
+        
         public static readonly Float2 PositiveInfinity =
             new Float2(float.PositiveInfinity, float.PositiveInfinity);
 

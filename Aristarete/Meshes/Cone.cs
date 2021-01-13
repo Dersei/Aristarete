@@ -37,8 +37,34 @@ namespace Aristarete.Meshes
                 var offset = i + bottomOffset;
                 triangles[offset] = new Int3(i + 1, subdivisions + 1, i + 2);
             }
+            
+            Float2[] uvs = new Float2[vertices.Length];
+            subdivisions -= 1;
+// Bottom cap
+            int u = 0;
+            uvs[u++] = new Float2(0.5f, 0.5f);
+            while (u <= subdivisions)
+            {
+                float rad = (float)u / subdivisions * MathF.PI*2;
+                uvs[u] = new Float2(MathF.Cos(rad) * .5f + .5f, MathF.Sin(rad) * .5f + .5f);
+                u++;
+            }
+            
+// Sides
+            int uSides = 0;
+            while (u <= uvs.Length - 4 )
+            {
+                float t = (float)uSides / subdivisions;
+                uvs[u] = new Float2(t, 1f);
+                uvs[u + 1] = new Float2(t, 0f);
+                u += 2;
+                uSides++;
+            }
+            uvs[u] = new Float2(1f, 1f);
+            uvs[u + 1] = new Float2(1f, 0f);
 
             Vertices = vertices;
+            UVs = uvs;
             Indices = triangles;
         }
 

@@ -54,6 +54,31 @@ namespace Aristarete.Meshes
                 23, 22, 21,
             };
 
+            Float2 _00 = new Float2( 0f, 0f );
+            Float2 _10 = new Float2( 1f, 0f );
+            Float2 _01 = new Float2( 0f, 1f );
+            Float2 _11 = new Float2( 1f, 1f );
+ 
+            Float2[] uvs = new Float2[]
+            {
+                // Bottom
+                _11, _01, _00, _10,
+ 
+                // Left
+                _11, _01, _00, _10,
+ 
+                // Front
+                _11, _01, _00, _10,
+ 
+                // Back
+                _11, _01, _00, _10,
+ 
+                // Right
+                _11, _01, _00, _10,
+ 
+                // Top
+                _11, _01, _00, _10,
+            };
 
             var size = triangles.Length / 3;
             Int3[] indices = new Int3[size];
@@ -63,6 +88,7 @@ namespace Aristarete.Meshes
             }
 
             Vertices = vertices;
+            UVs = uvs;
             Indices = indices;
         }
 

@@ -24,55 +24,47 @@ namespace Aristarete.Rendering
             _vertexProcessor.SetPerspective(45, 2, 0.1f, 100);
             _vertexProcessor.SetLookAt(new Float3(0, 0, 5), new Float3(0, 0, 0), Float3.Up);
             Statics.VertexProcessor = _vertexProcessor;
-            // _meshes.Add(new Pyramid(_vertexProcessor) {BasicColor = FloatColor.White}.CreateNormals()
-            //     .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Right / 2 + Float3.Up));
-            //
-            // _meshes.Add(new Cone(_vertexProcessor) {BasicColor = FloatColor.White}.CreateNormals()
-            //     .Scale(0.3f).Rotate(30, Float3.Left).Translate(1.5f * Float3.Right + Float3.Up));
-            //
-            // _meshes.Add(new Sphere(_vertexProcessor) {BasicColor = FloatColor.White}.CreateNormals()
-            //     .Scale(0.3f).Translate(Float3.Left / 2 + Float3.Up));
-            //
-            // _meshes.Add(new Sphere(_vertexProcessor, 1, 8, 6) {BasicColor = FloatColor.White}.CreateNormals()
-            //     .Scale(0.6f).Translate(Float3.Left));
-            // _meshes.Add(new Sphere(_vertexProcessor, 1, 8, 6) {BasicColor = FloatColor.White}.CreateNormals()
-            //     .Scale(0.6f).Translate(Float3.Right));
-            // _meshes.Add(new Sphere(_vertexProcessor, 1, 8, 6) {BasicColor = FloatColor.White}.CreateNormals()
-            //     .Scale(0.6f).Translate(Float3.Right * 3));
-            // _meshes.Add(new Sphere(_vertexProcessor, 1, 8, 6) {BasicColor = FloatColor.White}.CreateNormals()
-            //     .Scale(0.6f).Translate(Float3.Left * 3));
-            //
-            // _meshes.Add(new Sphere(_vertexProcessor) {BasicColor = FloatColor.White}.CreateNormals()
-            //     .Scale(0.3f).Rotate(45, Float3.Right).Translate(1.5f * Float3.Left + Float3.Up));
-            //
-            // _meshes.Add(new Torus(_vertexProcessor) {BasicColor = FloatColor.White}.CreateNormals()
-            //     .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Right / 2 + Float3.Down));
-            //
-            // _meshes.Add(new Tube(_vertexProcessor) {BasicColor = FloatColor.White}.CreateNormals()
-            //     .Scale(0.3f).Rotate(90, Float3.Right).Translate(1.5f * Float3.Right + Float3.Down));
-            //
-            // _meshes.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.White}.CreateNormals()
-            //     .Scale(0.3f).Rotate(45, Float3.Up).Translate(Float3.Left / 2 + Float3.Down));
-            //
-            // _meshes.Add(new Plane(_vertexProcessor) {BasicColor = FloatColor.White}.CreateNormals()
-            //     .Scale(0.3f).Rotate(90, Float3.Forward).Translate(1.5f * Float3.Left + Float3.Down));
-            //
-            for (var i = -1; i <= 1; i++)
+
+            for (var i = -1; i <= 1; i+=2)
             {
-                for (var j = -3; j <= 3; j++)
-                {
-                    _meshes.Add(new Sphere(_vertexProcessor, 1, 8, 6) {BasicColor = FloatColor.White}.CreateNormals()
-                        .Scale(0.3f).Translate(Float3.Up * i + Float3.Left * j));
-                }
+                _meshes.Add(new Sphere(_vertexProcessor, 1, 24, 24) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
+                    .CreateNormals().LoadTexture("_Resources/texel_density.png")
+                    .Scale(0.3f).Translate(Float3.Up * i + Float3.Left * -2));
+                _meshes.Add(new Torus(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
+                    .CreateNormals().LoadTexture("_Resources/texel_density.png")
+                    .Scale(0.3f).Translate(Float3.Up * i + Float3.Left * -1));
+                _meshes.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
+                    .CreateNormals().LoadTexture("_Resources/texel_density.png")
+                    .Scale(0.3f).Rotate(45, Float3.Up).Translate(Float3.Up * i + Float3.Left * 0));
+                _meshes.Add(new Tube(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
+                    .CreateNormals().LoadTexture("_Resources/texel_density.png")
+                    .Scale(0.3f).Rotate(45, Float3.Right).Translate(Float3.Up * i + Float3.Left * 1));
+                _meshes.Add(new Cone(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
+                    .CreateNormals().LoadTexture("_Resources/texel_density.png")
+                    .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Up * i + Float3.Left * 2));
             }
-            // _meshes.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.Grey}.CreateNormals()
-            //     .Scale(0.3f).Rotate(30, Float3.Up + Float3.Left + Float3.Down));
+            
+            _meshes.Add(new Sphere(_vertexProcessor, 1, 24, 24) {BasicColor = FloatColor.White}
+                .CreateNormals().LoadTexture("_Resources/circuitry-albedo.png")
+                .Scale(0.3f).Translate(Float3.Left * -2));
+            _meshes.Add(new Torus(_vertexProcessor) {BasicColor = FloatColor.White}
+                .CreateNormals().LoadTexture("_Resources/circuitry-albedo.png")
+                .Scale(0.3f).Translate(Float3.Left * -1));
+            _meshes.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.White}
+                .CreateNormals().LoadTexture("_Resources/circuitry-albedo.png")
+                .Scale(0.3f).Rotate(45, Float3.Up).Translate(Float3.Left * 0));
+            _meshes.Add(new Tube(_vertexProcessor) {BasicColor = FloatColor.White}
+                .CreateNormals().LoadTexture("_Resources/circuitry-albedo.png")
+                .Scale(0.3f).Rotate(45, Float3.Right).Translate(Float3.Left * 1));
+            _meshes.Add(new Cone(_vertexProcessor) {BasicColor = FloatColor.White}
+                .CreateNormals().LoadTexture("_Resources/circuitry-albedo.png")
+                .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Left * 2));
 
             Statics.Lights.Add(new DirectionalLight
             {
                 Position = Float3.Forward.Normalize(),
                 Ambient = FloatColor.Black,
-                Diffuse = FloatColor.White/10,
+                Diffuse = FloatColor.White,
                 Specular = FloatColor.White,
                 Shininess = 32
             });
@@ -157,7 +149,8 @@ namespace Aristarete.Rendering
             }
 
             var g = MathExtensions.PingPong((float) Time.RealGameTime.TotalMilliseconds / 1000, 1);
-            var g1 = MathExtensions.Lerp(-1,1, MathExtensions.PingPong((float) Time.RealGameTime.TotalMilliseconds / 1000, 1));
+            var g1 = MathExtensions.Lerp(-1, 1,
+                MathExtensions.PingPong((float) Time.RealGameTime.TotalMilliseconds / 1000, 1));
             g1 /= 4f;
             (Statics.Lights[1] as SpotLight).Direction = (Float3.Forward + Float3.Right * g1);
             (Statics.Lights[2] as SpotLight).Position = new Float3(0, 0, 5) + 2 * Float3.Right + Float3.Up * g1;

@@ -41,18 +41,23 @@ namespace Aristarete.Meshes
                 }
             }
 
-            
+            Float2[] uvs = new Float2[vertices.Length];
+            for (int seg = 0; seg <= radiusSegments; seg++)
+            for (int side = 0; side <= sides; side++)
+                uvs[side + seg * (sides + 1)] = new Float2((float) seg / radiusSegments, (float) side / sides);
+
+
             Float3[] normales = new Float3[vertices.Length];
-            for( int seg = 0; seg <= radiusSegments; seg++ )
+            for (int seg = 0; seg <= radiusSegments; seg++)
             {
-                int currSeg = seg  == radiusSegments ? 0 : seg;
-            
-                float t1 = (float)currSeg / radiusSegments * _2pi;
-                Float3 r1 = new Float3( MathF.Cos(t1) * radius1, 0f, MathF.Sin(t1) * radius1 );
-            
-                for( int side = 0; side <= sides; side++ )
+                int currSeg = seg == radiusSegments ? 0 : seg;
+
+                float t1 = (float) currSeg / radiusSegments * _2pi;
+                Float3 r1 = new Float3(MathF.Cos(t1) * radius1, 0f, MathF.Sin(t1) * radius1);
+
+                for (int side = 0; side <= sides; side++)
                 {
-                    normales[side + seg * (sides+1)] = (vertices[side + seg * (sides+1)].Position - r1).Normalize();
+                    normales[side + seg * (sides + 1)] = (vertices[side + seg * (sides + 1)].Position - r1).Normalize();
                 }
             }
 
@@ -95,6 +100,7 @@ namespace Aristarete.Meshes
             }
 
             Vertices = vertices;
+            UVs = uvs;
             Indices = indices;
         }
     }

@@ -14,5 +14,6 @@ namespace Aristarete
         public Float3 ApplyView(Float3 f);
         public Float3 Apply(Float3 f);
         public Float3 TransformNormals(Float3 f) => Float3.Zero;
+        public FloatColor GetDiffuse(Float2 uv) => FloatColor.Error;
     }
 }

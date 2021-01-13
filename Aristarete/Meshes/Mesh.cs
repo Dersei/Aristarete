@@ -1,5 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
+using System.Windows.Media.Imaging;
 using Aristarete.Basic;
+using Aristarete.Extensions;
 
 namespace Aristarete.Meshes
 {
@@ -7,14 +10,19 @@ namespace Aristarete.Meshes
     {
         public Vertex[] Vertices = null!;
         public Int3[] Indices = null!;
+        public Float2[] UVs = null!;
         public readonly VertexProcessor VertexProcessor;
         public FloatColor BasicColor = FloatColor.Error;
         public Matrix Object2World = Matrix.Identity;
         public Matrix Object2Projection = Matrix.Identity;
         public Matrix Object2View = Matrix.Identity;
         private bool _isDirty = true;
-        public bool VertexLight = false;
+        public LightingMode LightingMode = LightingMode.Pixel;
         public bool LiveUpdate = false;
+
+        private uint[]? _diffuseMap;
+        private int _mapWidth;
+        private int _mapHeight;
 
         protected Mesh(VertexProcessor vertexProcessor)
         {
@@ -54,6 +62,18 @@ namespace Aristarete.Meshes
             return this;
         }
 
+        public IRenderable LoadTexture(string textureName)
+        {
+            var img = new BitmapImage(new Uri(textureName, UriKind.Relative));
+            var wbm = new WriteableBitmap(img);
+            var colors = new uint[wbm.PixelWidth * wbm.PixelHeight];
+            wbm.CopyPixels(colors, wbm.BackBufferStride, 0);
+            _diffuseMap = colors;
+            _mapWidth = wbm.PixelWidth;
+            _mapHeight = wbm.PixelHeight;
+            return this;
+        }
+
         public void Transform()
         {
             Object2View = VertexProcessor.World2View * Object2World;
@@ -69,14 +89,22 @@ namespace Aristarete.Meshes
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Float3 TransformNormals(Float3 f) => Object2View.MultiplyVector(f);
-       // public Float3 TransformNormals(Float3 f) => Matrix.MultiplyVector(Object2View,f);
+
+        // public Float3 TransformNormals(Float3 f) => Matrix.MultiplyVector(Object2View,f);
+        public FloatColor GetDiffuse(Float2 uv)
+        {
+            if (_diffuseMap is null) return FloatColor.Error;
+            var x = MathExtensions.Clamp((int) (uv.X),0,_mapWidth - 1);
+            var y = MathExtensions.Clamp((int) (uv.Y),0,_mapHeight - 1);
+            return FloatColor.FromArgb(_diffuseMap[y * _mapHeight + x]);
+        }
 
         public void Update(Rasterizer rasterizer)
         {
             if (_isDirty)
             {
                 Transform();
-                if(LiveUpdate) SetIdentity();
+                if (LiveUpdate) SetIdentity();
             }
 
             for (var i = 0; i < Indices.Length; i++)
@@ -92,47 +120,97 @@ namespace Aristarete.Meshes
                     worldCoords[j] = v;
                 }
 
-                var uv = new Float2[3];
-                for (var k = 0; k < 3; k++)
+                var uvs = new Float2[3];
+                if (_diffuseMap is not null)
                 {
-                    uv[k] = Float2.Zero;
+                    for (var k = 0; k < 3; k++)
+                    {
+                        uvs[k] = new Float2(UVs[face[k]].X * _mapWidth, UVs[face[k]].Y * _mapHeight);
+                    }
                 }
 
-                if (VertexLight)
+                switch (LightingMode)
                 {
-                    
-                    var colorA = FloatColor.Black;
-                    var colorB = FloatColor.Black;
-                    var colorC = FloatColor.Black;
-
-                    foreach (var light in Statics.Lights)
+                    case LightingMode.Vertex:
                     {
-                        colorA += light.Calculate(Vertices[Indices[i].X], this);
-                        colorB += light.Calculate(Vertices[Indices[i].Y], this);
-                        colorC += light.Calculate(Vertices[Indices[i].Z], this);
+                        var colorA = FloatColor.Black;
+                        var colorB = FloatColor.Black;
+                        var colorC = FloatColor.Black;
+
+                        foreach (var light in Statics.Lights)
+                        {
+                            colorA += light.Calculate(Vertices[Indices[i].X], this);
+                            colorB += light.Calculate(Vertices[Indices[i].Y], this);
+                            colorC += light.Calculate(Vertices[Indices[i].Z], this);
+                        }
+
+                        rasterizer.TriangleVertices(
+                            screenCoords,
+                            new[]
+                            {
+                                colorA * BasicColor, colorB * BasicColor, colorC * BasicColor
+                            });
+                        break;
                     }
 
-                    rasterizer.TriangleVertices(
-                        screenCoords,
-                        new[]
+                    case LightingMode.Pixel:
+                    {
+                        if (_diffuseMap is null)
                         {
-                            colorA * BasicColor, colorB * BasicColor, colorC * BasicColor
-                        });
+                            rasterizer.Triangle(new[]
+                                {
+                                    Vertices[Indices[i].X],
+                                    Vertices[Indices[i].Y],
+                                    Vertices[Indices[i].Z]
+                                },
+                                screenCoords,
+                                new[]
+                                {
+                                    BasicColor, BasicColor, BasicColor
+                                }, this);
+                        }
+                        else
+                        {
+                            rasterizer.Triangle(new[]
+                                {
+                                    Vertices[Indices[i].X],
+                                    Vertices[Indices[i].Y],
+                                    Vertices[Indices[i].Z]
+                                },
+                                screenCoords,
+                                new[]
+                                {
+                                    BasicColor, BasicColor, BasicColor
+                                }, uvs, this);
+                        }
+                        break;
+                    }
+                    case LightingMode.None:
+                    {
+                        if (_diffuseMap is null)
+                        {
+                            rasterizer.TriangleVertices(
+                                screenCoords,
+                                new[]
+                                {
+                                    BasicColor, BasicColor, BasicColor
+                                });
+                        }
+                        else
+                        {
+                            rasterizer.TriangleVertices(
+                                screenCoords,
+                                new[]
+                                {
+                                    BasicColor, BasicColor, BasicColor
+                                }, uvs, this);
+                        }
+                        break;
+                    }
                 }
-                else
-                {
-                    rasterizer.Triangle(new[]
-                        {
-                            Vertices[Indices[i].X],
-                            Vertices[Indices[i].Y],
-                            Vertices[Indices[i].Z]
-                        },
-                        screenCoords,
-                        new[]
-                        {
-                            BasicColor, BasicColor, BasicColor
-                        }, this);
-                }
+                
+
+  
             }
         }
 
