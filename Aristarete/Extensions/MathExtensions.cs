@@ -46,6 +46,7 @@ namespace Aristarete.Extensions
             return (byte) value;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Clamp01(float value)
         {
             if (value <= 0F)

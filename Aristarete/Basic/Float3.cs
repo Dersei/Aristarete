@@ -186,7 +186,10 @@ namespace Aristarete.Basic
 
             return Zero;
         }
-        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Float3 NormalizeUnsafe() => this / Length;
+
         public static Float3 Normalize(Float3 v)
         {
             return v.Normalize();

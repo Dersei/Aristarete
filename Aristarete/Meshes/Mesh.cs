@@ -1,7 +1,5 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Runtime.CompilerServices;
 using Aristarete.Basic;
-using Aristarete.Lighting;
 
 namespace Aristarete.Meshes
 {
@@ -9,14 +7,14 @@ namespace Aristarete.Meshes
     {
         public Vertex[] Vertices = null!;
         public Int3[] Indices = null!;
-        public VertexProcessor VertexProcessor { get; }
+        public readonly VertexProcessor VertexProcessor;
         public FloatColor BasicColor = FloatColor.Error;
         public Matrix Object2World = Matrix.Identity;
         public Matrix Object2Projection = Matrix.Identity;
         public Matrix Object2View = Matrix.Identity;
         private bool _isDirty = true;
         public bool VertexLight = false;
-        public bool LifeUpdate = false;
+        public bool LiveUpdate = false;
 
         protected Mesh(VertexProcessor vertexProcessor)
         {
@@ -63,18 +61,22 @@ namespace Aristarete.Meshes
             _isDirty = false;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Float3 Apply(Float3 f) => Object2Projection.MultiplyPoint(f);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Float3 ApplyView(Float3 f) => Object2View.MultiplyPoint(f);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Float3 TransformNormals(Float3 f) => Object2View.MultiplyVector(f);
+       // public Float3 TransformNormals(Float3 f) => Matrix.MultiplyVector(Object2View,f);
 
         public void Update(Rasterizer rasterizer)
         {
             if (_isDirty)
             {
                 Transform();
-                if(LifeUpdate) SetIdentity();
+                if(LiveUpdate) SetIdentity();
             }
 
             for (var i = 0; i < Indices.Length; i++)
@@ -96,19 +98,20 @@ namespace Aristarete.Meshes
                     uv[k] = Float2.Zero;
                 }
 
-                var colorA = FloatColor.Black;
-                var colorB = FloatColor.Black;
-                var colorC = FloatColor.Black;
-
-                foreach (var light in Statics.Lights)
-                {
-                    colorA += light.Calculate(Vertices[Indices[i].X], this);
-                    colorB += light.Calculate(Vertices[Indices[i].Y], this);
-                    colorC += light.Calculate(Vertices[Indices[i].Z], this);
-                }
-
                 if (VertexLight)
                 {
+                    
+                    var colorA = FloatColor.Black;
+                    var colorB = FloatColor.Black;
+                    var colorC = FloatColor.Black;
+
+                    foreach (var light in Statics.Lights)
+                    {
+                        colorA += light.Calculate(Vertices[Indices[i].X], this);
+                        colorB += light.Calculate(Vertices[Indices[i].Y], this);
+                        colorC += light.Calculate(Vertices[Indices[i].Z], this);
+                    }
+
                     rasterizer.TriangleVertices(
                         screenCoords,
                         new[]
@@ -128,9 +131,6 @@ namespace Aristarete.Meshes
                         new[]
                         {
                             BasicColor, BasicColor, BasicColor
-                            // FloatColor.FromNormal(Vertices[Indices[i].X].Normal),
-                            // FloatColor.FromNormal(Vertices[Indices[i].Y].Normal),
-                            // FloatColor.FromNormal(Vertices[Indices[i].Z].Normal)
                         }, this);
                 }
             }
@@ -138,12 +138,12 @@ namespace Aristarete.Meshes
 
         public Mesh CreateNormals()
         {
-            for (int i = 0; i < Vertices.Length; i++)
+            for (var i = 0; i < Vertices.Length; i++)
             {
                 Vertices[i].Normal = Float3.Zero;
             }
 
-            for (int i = 0; i < Indices.Length; i++)
+            for (var i = 0; i < Indices.Length; i++)
             {
                 var n = (Vertices[Indices[i].Y].Position - Vertices[Indices[i].X].Position).Cross(
                     Vertices[Indices[i].Z].Position - Vertices[Indices[i].X].Position);
@@ -153,7 +153,7 @@ namespace Aristarete.Meshes
                 Vertices[Indices[i].Z].Normal += n;
             }
 
-            for (int i = 0; i < Vertices.Length; i++)
+            for (var i = 0; i < Vertices.Length; i++)
             {
                 Vertices[i].Normal = Float3.Normalize(Vertices[i].Normal);
             }

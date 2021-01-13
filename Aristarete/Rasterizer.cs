@@ -146,8 +146,6 @@ namespace Aristarete
                 bBoxMax = Float2.MaxClamped(bBoxMax, vertices[i].XY, clamp);
             }
 
-            var z = 0f;
-
             var barycentricHelper = new BarycentricHelper(vertices[0], vertices[1], vertices[2]);
 
             for (var x = bBoxMin.X; x <= bBoxMax.X; x++)
@@ -156,7 +154,7 @@ namespace Aristarete
                 {
                     var barycentric = barycentricHelper.Calculate(x, y);
                     if (barycentric.X < 0 || barycentric.Y < 0 || barycentric.Z < 0) continue;
-                    z = 0;
+                    float z = 0;
                     z += 1f / vertices[0].Z * barycentric.X;
                     z += 1f / vertices[1].Z * barycentric.Y;
                     z += 1f / vertices[2].Z * barycentric.Z;

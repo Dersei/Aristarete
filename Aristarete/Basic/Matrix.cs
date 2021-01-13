@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 using Aristarete.Extensions;
@@ -363,6 +364,25 @@ namespace Aristarete.Basic
             var resultZ = M31 * vector.X + M32 * vector.Y + M33 * vector.Z;
             return new Float3(resultX, resultY, resultZ);
         }
+        
+        public static unsafe Float3 MultiplyVector(Matrix matrix, Float3 vector)
+        {
+            Unsafe.SkipInit(out Float3 result);
+
+            if (Sse.IsSupported)
+            {
+                Sse.Store(&result.X, Sse.Add(Sse.Add(
+                            Sse.Multiply(Sse.LoadAlignedVector128(&matrix.M11), Vector128.Create(vector.X)),
+                            Sse.Multiply(Sse.LoadAlignedVector128(&matrix.M12), Vector128.Create(vector.Y))),
+                        Sse.Multiply(Sse.LoadAlignedVector128(&matrix.M13), Vector128.Create(vector.Z))));
+                return result;
+            }
+            // var resultX = M11 * vector.X + M12 * vector.Y + M13 * vector.Z;
+            // var resultY = M21 * vector.X + M22 * vector.Y + M23 * vector.Z;
+            // var resultZ = M31 * vector.X + M32 * vector.Y + M33 * vector.Z;
+            return result;
+        }
+
 
         public static Matrix Rotate(float angle, Float3 axis)
         {
