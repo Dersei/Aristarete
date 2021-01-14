@@ -29,6 +29,7 @@ namespace Aristarete.Meshes
 
             Vertex[] cylinderVertices = new Vertex[vertexCount];
             Float3[] cylinderNormals = new Float3[vertexCount];
+            Float2[] cylinderUVs = new Float2[vertexCount];
 
             // Start at the bottom of the cylinder            
             var currentVertex = 0;
@@ -47,6 +48,9 @@ namespace Aristarete.Meshes
                     var position = new Float3(x, y, z);
                     cylinderVertices[currentVertex] = position;
                     cylinderNormals[currentVertex] = Float3.Normalize(position);
+                    cylinderUVs[currentVertex] =
+                        new Float2((float) (Math.Sin(cylinderNormals[currentVertex].X)/MathF.PI + 0.5f),
+                            (float) (Math.Sin(cylinderNormals[currentVertex].Y)/MathF.PI + 0.5f));
                     currentVertex++;
 
                     sliceAngle += sliceStep;
@@ -71,6 +75,11 @@ namespace Aristarete.Meshes
             for (int i = 0; i < cylinderVertices.Length; i++)
             {
                 cylinderVertices[i].Normal = cylinderNormals[i];
+            }
+            
+            for (var n = 0; n < cylinderVertices.Length; n++)
+            {
+                cylinderVertices[n].UV = cylinderUVs[n];
             }
 
             Vertices = cylinderVertices;

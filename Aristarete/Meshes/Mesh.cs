@@ -2,6 +2,8 @@
 using System.Runtime.CompilerServices;
 using System.Windows.Media.Imaging;
 using Aristarete.Basic;
+using Aristarete.Basic.Materials;
+using Aristarete.Basic.Textures;
 using Aristarete.Extensions;
 
 namespace Aristarete.Meshes
@@ -10,7 +12,6 @@ namespace Aristarete.Meshes
     {
         public Vertex[] Vertices = null!;
         public Int3[] Indices = null!;
-        public Float2[] UVs = null!;
         public readonly VertexProcessor VertexProcessor;
         public FloatColor BasicColor = FloatColor.Error;
         public Matrix Object2World = Matrix.Identity;
@@ -20,9 +21,7 @@ namespace Aristarete.Meshes
         public LightingMode LightingMode = LightingMode.Pixel;
         public bool LiveUpdate = false;
 
-        private uint[]? _diffuseMap;
-        private int _mapWidth;
-        private int _mapHeight;
+        public PbrMaterial? Material { get; set; }
 
         protected Mesh(VertexProcessor vertexProcessor)
         {
@@ -62,15 +61,55 @@ namespace Aristarete.Meshes
             return this;
         }
 
-        public IRenderable LoadTexture(string textureName)
+        public Mesh LoadDiffuseMap(string textureName)
         {
-            var img = new BitmapImage(new Uri(textureName, UriKind.Relative));
-            var wbm = new WriteableBitmap(img);
-            var colors = new uint[wbm.PixelWidth * wbm.PixelHeight];
-            wbm.CopyPixels(colors, wbm.BackBufferStride, 0);
-            _diffuseMap = colors;
-            _mapWidth = wbm.PixelWidth;
-            _mapHeight = wbm.PixelHeight;
+            if (Material is null)
+            {
+                Material = new PbrMaterial(BasicColor, new TextureInfo(Texture.LoadFrom(textureName)));
+            }
+            else
+            {
+                Material.SpecularMap = new TextureInfo(Texture.LoadFrom(textureName));
+            }
+            return this;
+        }
+        
+        public Mesh LoadSpecularMap(string textureName)
+        {
+            if (Material is null)
+            {
+                Material = new PbrMaterial(BasicColor, new TextureInfo(Texture.LoadFrom(textureName)));
+            }
+            else
+            {
+                Material.SpecularMap = new TextureInfo(Texture.LoadFrom(textureName));
+            }
+            return this;
+        }
+        
+        public Mesh LoadEmissiveMap(string textureName)
+        {
+            if (Material is null)
+            {
+                Material = new PbrMaterial(BasicColor, new TextureInfo(Texture.LoadFrom(textureName)));
+            }
+            else
+            {
+                Material.EmissiveMap = new TextureInfo(Texture.LoadFrom(textureName));
+            }
+            return this;
+        }
+        
+        public Mesh LoadNormalMap(string textureName)
+        {
+            if (Material is null)
+            {
+                Material = new PbrMaterial(BasicColor, new TextureInfo(Texture.LoadFrom(textureName)));
+            }
+            else
+            {
+                Material.NormalMap = new TextureInfo(Texture.LoadFrom(textureName));
+            }
             return this;
         }
 
@@ -91,13 +130,6 @@ namespace Aristarete.Meshes
         public Float3 TransformNormals(Float3 f) => Object2View.MultiplyVector(f);
 
         // public Float3 TransformNormals(Float3 f) => Matrix.MultiplyVector(Object2View,f);
-        public FloatColor GetDiffuse(Float2 uv)
-        {
-            if (_diffuseMap is null) return FloatColor.Error;
-            var x = MathExtensions.Clamp((int) (uv.X),0,_mapWidth - 1);
-            var y = MathExtensions.Clamp((int) (uv.Y),0,_mapHeight - 1);
-            return FloatColor.FromArgb(_diffuseMap[y * _mapHeight + x]);
-        }
 
         public void Update(Rasterizer rasterizer)
         {
@@ -120,15 +152,6 @@ namespace Aristarete.Meshes
                     worldCoords[j] = v;
                 }
 
-                var uvs = new Float2[3];
-                if (_diffuseMap is not null)
-                {
-                    for (var k = 0; k < 3; k++)
-                    {
-                        uvs[k] = new Float2(UVs[face[k]].X * _mapWidth, UVs[face[k]].Y * _mapHeight);
-                    }
-                }
-
                 switch (LightingMode)
                 {
                     case LightingMode.Vertex:
@@ -144,18 +167,13 @@ namespace Aristarete.Meshes
                             colorC += light.Calculate(Vertices[Indices[i].Z], this);
                         }
 
-                        rasterizer.TriangleVertices(
-                            screenCoords,
-                            new[]
-                            {
-                                colorA * BasicColor, colorB * BasicColor, colorC * BasicColor
-                            });
+                        rasterizer.TriangleVertices(screenCoords, this);
                         break;
                     }
 
                     case LightingMode.Pixel:
                     {
-                        if (_diffuseMap is null)
+                        if (Material is null)
                         {
                             rasterizer.Triangle(new[]
                                 {
@@ -163,54 +181,40 @@ namespace Aristarete.Meshes
                                     Vertices[Indices[i].Y],
                                     Vertices[Indices[i].Z]
                                 },
-                                screenCoords,
-                                new[]
-                                {
-                                    BasicColor, BasicColor, BasicColor
-                                }, this);
+                                screenCoords, this);
                         }
                         else
                         {
-                            rasterizer.Triangle(new[]
+                            rasterizer.TriangleMaterial(new[]
                                 {
                                     Vertices[Indices[i].X],
                                     Vertices[Indices[i].Y],
                                     Vertices[Indices[i].Z]
                                 },
-                                screenCoords,
-                                new[]
-                                {
-                                    BasicColor, BasicColor, BasicColor
-                                }, uvs, this);
+                                screenCoords, this);
                         }
+
                         break;
                     }
                     case LightingMode.None:
                     {
-                        if (_diffuseMap is null)
+                        if (Material is null)
                         {
-                            rasterizer.TriangleVertices(
-                                screenCoords,
-                                new[]
-                                {
-                                    BasicColor, BasicColor, BasicColor
-                                });
+                            rasterizer.TriangleVertices(screenCoords, this);
                         }
                         else
                         {
-                            rasterizer.TriangleVertices(
-                                screenCoords,
-                                new[]
-                                {
-                                    BasicColor, BasicColor, BasicColor
-                                }, uvs, this);
+                            rasterizer.TriangleVertices(new[]
+                            {
+                                Vertices[Indices[i].X],
+                                Vertices[Indices[i].Y],
+                                Vertices[Indices[i].Z]
+                            }, screenCoords, this);
                         }
+
                         break;
                     }
                 }
-                
-
-  
             }
         }
 

@@ -62,9 +62,13 @@ namespace Aristarete.Meshes
             }
             uvs[u] = new Float2(1f, 1f);
             uvs[u + 1] = new Float2(1f, 0f);
-
+            
+            for (var n = 0; n < vertices.Length; n++)
+            {
+                vertices[n].UV = uvs[n];
+            }
+            
             Vertices = vertices;
-            UVs = uvs;
             Indices = triangles;
         }
 

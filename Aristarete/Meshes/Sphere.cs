@@ -93,6 +93,12 @@ namespace Aristarete.Meshes
                 triangles[i++] = vertices.Length - (lon + 2) - 1;
                 triangles[i++] = vertices.Length - (lon + 1) - 1;
             }
+            
+            
+            for (var n = 0; n < vertices.Length; n++)
+            {
+                vertices[n].UV = uvs[n];
+            }
 
             var size = triangles.Length / 3;
             Int3[] indices = new Int3[size];
@@ -103,7 +109,6 @@ namespace Aristarete.Meshes
 
             Vertices = vertices;
             Indices = indices;
-            UVs = uvs;
         }
     }
 }

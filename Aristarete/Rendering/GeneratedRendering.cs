@@ -28,41 +28,71 @@ namespace Aristarete.Rendering
             for (var i = -1; i <= 1; i+=2)
             {
                 _meshes.Add(new Sphere(_vertexProcessor, 1, 24, 24) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
-                    .CreateNormals().LoadTexture("_Resources/texel_density.png")
+                    .CreateNormals().LoadSpecularMap("_Resources/texel_density.png")
                     .Scale(0.3f).Translate(Float3.Up * i + Float3.Left * -2));
                 _meshes.Add(new Torus(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
-                    .CreateNormals().LoadTexture("_Resources/texel_density.png")
+                    .CreateNormals().LoadSpecularMap("_Resources/texel_density.png")
                     .Scale(0.3f).Translate(Float3.Up * i + Float3.Left * -1));
                 _meshes.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
-                    .CreateNormals().LoadTexture("_Resources/texel_density.png")
+                    .CreateNormals().LoadSpecularMap("_Resources/texel_density.png")
                     .Scale(0.3f).Rotate(45, Float3.Up).Translate(Float3.Up * i + Float3.Left * 0));
                 _meshes.Add(new Tube(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
-                    .CreateNormals().LoadTexture("_Resources/texel_density.png")
+                    .CreateNormals().LoadSpecularMap("_Resources/texel_density.png")
                     .Scale(0.3f).Rotate(45, Float3.Right).Translate(Float3.Up * i + Float3.Left * 1));
                 _meshes.Add(new Cone(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
-                    .CreateNormals().LoadTexture("_Resources/texel_density.png")
+                    .CreateNormals().LoadSpecularMap("_Resources/texel_density.png")
                     .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Up * i + Float3.Left * 2));
+                _meshes.Add(new Cylinder(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
+                    .CreateNormals().LoadSpecularMap("_Resources/texel_density.png")
+                    .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Up * i + Float3.Left * 3));
             }
             
             _meshes.Add(new Sphere(_vertexProcessor, 1, 24, 24) {BasicColor = FloatColor.White}
-                .CreateNormals().LoadTexture("_Resources/circuitry-albedo.png")
+                .CreateNormals()
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
+                .LoadEmissiveMap("_Resources/circuitry-emission.png")
+                .LoadNormalMap("_Resources/circuitry-normals.png")
                 .Scale(0.3f).Translate(Float3.Left * -2));
             _meshes.Add(new Torus(_vertexProcessor) {BasicColor = FloatColor.White}
-                .CreateNormals().LoadTexture("_Resources/circuitry-albedo.png")
+                .CreateNormals()
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
+                .LoadEmissiveMap("_Resources/circuitry-emission.png")
+                .LoadNormalMap("_Resources/circuitry-normals.png")
                 .Scale(0.3f).Translate(Float3.Left * -1));
             _meshes.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.White}
-                .CreateNormals().LoadTexture("_Resources/circuitry-albedo.png")
+                .CreateNormals()
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
+                .LoadEmissiveMap("_Resources/circuitry-emission.png")
+                .LoadNormalMap("_Resources/circuitry-normals.png")
                 .Scale(0.3f).Rotate(45, Float3.Up).Translate(Float3.Left * 0));
             _meshes.Add(new Tube(_vertexProcessor) {BasicColor = FloatColor.White}
-                .CreateNormals().LoadTexture("_Resources/circuitry-albedo.png")
+                .CreateNormals()
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
+                .LoadEmissiveMap("_Resources/circuitry-emission.png")
+                .LoadNormalMap("_Resources/circuitry-normals.png")
                 .Scale(0.3f).Rotate(45, Float3.Right).Translate(Float3.Left * 1));
             _meshes.Add(new Cone(_vertexProcessor) {BasicColor = FloatColor.White}
-                .CreateNormals().LoadTexture("_Resources/circuitry-albedo.png")
+                .CreateNormals()
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
+                .LoadEmissiveMap("_Resources/circuitry-emission.png")
+                .LoadNormalMap("_Resources/circuitry-normals.png")
                 .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Left * 2));
+            _meshes.Add(new Cylinder(_vertexProcessor) {BasicColor = FloatColor.White}
+                .CreateNormals()
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
+                .LoadEmissiveMap("_Resources/circuitry-emission.png")
+                .LoadNormalMap("_Resources/circuitry-normals.png")
+                .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Left * 3));
 
             Statics.Lights.Add(new DirectionalLight
             {
-                Position = Float3.Forward.Normalize(),
+                Position = Float3.Left.Normalize(),
                 Ambient = FloatColor.Black,
                 Diffuse = FloatColor.White,
                 Specular = FloatColor.White,

@@ -220,9 +220,13 @@ namespace Aristarete.Meshes
             {
                 indices[j] = new Int3(triangles[j * 3], triangles[j * 3 + 1], triangles[j * 3 + 2]);
             }
+            
+            for (var n = 0; n < vertices.Length; n++)
+            {
+                vertices[n].UV = uvs[n];
+            }
 
             Vertices = vertices;
-            UVs = uvs;
             Indices = indices;
         }
     }
