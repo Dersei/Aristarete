@@ -43,8 +43,12 @@ namespace Aristarete.Meshes
 
             Float2[] uvs = new Float2[vertices.Length];
             for (int seg = 0; seg <= radiusSegments; seg++)
-            for (int side = 0; side <= sides; side++)
-                uvs[side + seg * (sides + 1)] = new Float2((float) seg / radiusSegments, (float) side / sides);
+            {
+                for (int side = 0; side <= sides; side++)
+                {
+                    uvs[side + seg * (sides + 1)] = new Float2((float) seg / radiusSegments, (float) side / sides);
+                }
+            }
 
 
             Float3[] normales = new Float3[vertices.Length];
@@ -98,7 +102,7 @@ namespace Aristarete.Meshes
             {
                 indices[j] = new Int3(triangles[j * 3], triangles[j * 3 + 1], triangles[j * 3 + 2]);
             }
-            
+
             for (var n = 0; n < vertices.Length; n++)
             {
                 vertices[n].UV = uvs[n];

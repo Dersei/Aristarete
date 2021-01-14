@@ -50,9 +50,13 @@ namespace Aristarete.Meshes
             uvs[0] = Float2.Up;
             uvs[^1] = Float2.Zero;
             for (var lat = 0; lat < latitude; lat++)
-            for (var lon = 0; lon <= length; lon++)
-                uvs[lon + lat * (length + 1) + 1] =
-                    new Float2((float) lon / length, 1f - (float) (lat + 1) / (latitude + 1));
+            {
+                for (var lon = 0; lon <= length; lon++)
+                {
+                    uvs[lon + lat * (length + 1) + 1] =
+                        new Float2((float) lon / length, 1f - (float) (lat + 1) / (latitude + 1));
+                }
+            }
 
             var nbFaces = vertices.Length;
             var nbTriangles = nbFaces * 2;
@@ -93,8 +97,8 @@ namespace Aristarete.Meshes
                 triangles[i++] = vertices.Length - (lon + 2) - 1;
                 triangles[i++] = vertices.Length - (lon + 1) - 1;
             }
-            
-            
+
+
             for (var n = 0; n < vertices.Length; n++)
             {
                 vertices[n].UV = uvs[n];

@@ -12,10 +12,11 @@ namespace Aristarete.Lighting
         {
             var n = renderable.TransformNormals(vertex.Normal + renderable.Material.GetNormals(vertex.UV)).NormalizeUnsafe();
             var v = renderable.ApplyView(-vertex.Position).NormalizeUnsafe();
-            var r = Position.Reflect(n).NormalizeUnsafe();
+            var r = Position.Reflect(n);
             var diff = Saturate(Position.Dot(n));
+
             
-            var spec = MathF.Pow(Saturate(Dot(r,v)), (1-renderable.Material.GetSpecular(vertex.UV).R));
+            var spec = diff > 0 ? MathF.Pow(MathF.Max(Dot(v, r), 0), 8 * (1 - renderable.Material.GetSpecular(vertex.UV).R)) : 0;
 
             return Saturate(Ambient + Diffuse * diff + Specular * spec).AlphaToOne() + renderable.Material.GetEmissive(vertex.UV);
         }

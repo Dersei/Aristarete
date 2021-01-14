@@ -30,42 +30,42 @@ namespace Aristarete.Rendering
 
             _meshes.Add(new Sphere(_vertexProcessor, 1, 24, 24)
                 {
-                    BasicColor = FloatColor.White, Material = new PbrMaterial(FloatColor.White,
-                        new TextureInfo(Texture.LoadFrom("_Resources/circuitry-albedo.png"))
-                        ,specularMap: new TextureInfo(Texture.LoadFrom("_Resources/circuitry-smoothness.png"))
-                        ,emissiveMap: new TextureInfo(Texture.LoadFrom("_Resources/circuitry-emission.png"))
-                        ,normalMap: new TextureInfo(Texture.LoadFrom("_Resources/circuitry-normals.png"))
-                     ),
-                    LightingMode = LightingMode.Pixel
+                    BasicColor = FloatColor.White
                 }
                 .CreateNormals()
-                .Scale(0.7f).Translate(Float3.Left * 2));
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
+                .LoadEmissiveMap("_Resources/circuitry-emission.png")
+                .LoadNormalMap("_Resources/circuitry-normals.png")
+                .Scale(0.7f).Translate(Float3.Left));
             
             _meshes.Add(new Sphere(_vertexProcessor, 1, 24, 24)
                 {
-                    BasicColor = FloatColor.White, Material = new PbrMaterial(FloatColor.White,
-                        new TextureInfo(Texture.LoadFrom("_Resources/circuitry-albedo.png"))
-                       // ,specularMap: new TextureInfo(Texture.LoadFrom("_Resources/circuitry-smoothness.png"))
-                    )
+                    BasicColor = FloatColor.White,
+                    LightingMode = LightingMode.Pixel
                 }
+                .LoadDiffuseMap("_Resources/lava-albedo.png")
+                .LoadSpecularMap("_Resources/lava-smoothness.png")
+                .LoadEmissiveMap("_Resources/lava-emission.png", 3)
+                .LoadNormalMap("_Resources/lava-normals.png")
                 .CreateNormals()
-                .Scale(0.7f).Translate(Float3.Right * 2));
+                .Scale(0.7f).Translate(Float3.Right));
 
             Statics.Lights.Add(new DirectionalLight
             {
-                Position = Float3.Down.Normalize(),
+                Position = (Float3.Up).Normalize(),
                 Ambient = FloatColor.Black,
                 Diffuse = FloatColor.White,
                 Specular = FloatColor.Red,
                 Shininess = 32
             });
             //
-            Statics.Lights.Add(new PointLight()
+            Statics.Lights.Add(new PointLight
             {
-                Position = Float3.Back * 5 + 5 * Float3.Left,
+                Position = Float3.Back * 5 + Float3.Left * 5,
                 Ambient = FloatColor.Black,
-                Diffuse = FloatColor.Red,
-                Specular = FloatColor.Black,
+                Diffuse = FloatColor.Green,
+                Specular = FloatColor.White,
                 Shininess = 32
             });
             // Statics.Lights.Add(new PointLight()

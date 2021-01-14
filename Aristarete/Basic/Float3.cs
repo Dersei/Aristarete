@@ -46,7 +46,7 @@ namespace Aristarete.Basic
         public static readonly Float3 UnitX = new Float3(1f, 0f, 0f);
         public static readonly Float3 UnitY = new Float3(0f, 1f, 0f);
         public static readonly Float3 UnitZ = new Float3(0f, 0f, 1f);
-        
+
         private const float Epsilon = 0.00001f;
         private const float DoubledEpsilon = Epsilon * Epsilon;
         private const float EpsilonNormalSqrt = 1e-15f;
@@ -154,8 +154,9 @@ namespace Aristarete.Basic
         {
             return HashCode.Combine(X, Y, Z);
         }
-        
+
         #endregion
+
         #region ToString
 
         public string ToString(string? format, IFormatProvider? formatProvider)
@@ -163,7 +164,7 @@ namespace Aristarete.Basic
             return
                 $"({X.ToString(format, formatProvider)}, {Y.ToString(format, formatProvider)}, {Z.ToString(format, formatProvider)})";
         }
-        
+
         public string ToString(string? format)
         {
             return ToString(format, CultureInfo.CurrentCulture);
@@ -194,13 +195,13 @@ namespace Aristarete.Basic
         {
             return v.Normalize();
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float Dot(Float3 v)
         {
             return X * v.X + Y * v.Y + Z * v.Z;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Dot(Float3 v1, Float3 v2)
         {
@@ -243,7 +244,7 @@ namespace Aristarete.Basic
         {
             return new Float3(X + t * (vector.X - X), Y + t * (vector.Y - Y), Z + t * (vector.Z - Z));
         }
-        
+
         public static Float3 Lerp(Float3 v1, Float3 v2, float t)
         {
             t = MathExtensions.Clamp01(t);
@@ -272,7 +273,7 @@ namespace Aristarete.Basic
             var dot = MathExtensions.Clamp(Dot(from, to) / denominator, -1f, 1f);
             return MathF.Acos(dot) * MathExtensions.Rad2Deg;
         }
-        
+
         public static float SignedAngle(Float3 from, Float3 to, Float3 axis)
         {
             var unsignedAngle = Angle(from, to);
@@ -309,7 +310,7 @@ namespace Aristarete.Basic
                 MathF.Sqrt(vector.Z)
             );
         }
-        
+
         public static Float3 Abs(Float3 vector)
         {
             return new Float3(
@@ -399,8 +400,8 @@ namespace Aristarete.Basic
         public static implicit operator (float x, float y, float z)(Float3 v) => (v.X, v.Y, v.Z);
 
         public void Deconstruct(out float x, out float y, out float z) => (x, y, z) = (X, Y, Z);
-        
-        public Float2 XY => new Float2(X,Y);
+
+        public Float2 XY => new Float2(X, Y);
 
         public FloatColor ToFloatColor()
         {

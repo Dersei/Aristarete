@@ -62,7 +62,7 @@ namespace Aristarete.Basic.Materials
             if (texelColor != null) return texelColor.Value * EmissionFactor;
             return FloatColor.Black;
         }
-
+        
         public Float3 GetNormals(Float2 uv)
         {
             var texelColor = NormalMap?.GetColor(uv);

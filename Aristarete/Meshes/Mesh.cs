@@ -71,35 +71,42 @@ namespace Aristarete.Meshes
             {
                 Material.SpecularMap = new TextureInfo(Texture.LoadFrom(textureName));
             }
+
             return this;
         }
-        
+
         public Mesh LoadSpecularMap(string textureName)
         {
             if (Material is null)
             {
-                Material = new PbrMaterial(BasicColor, new TextureInfo(Texture.LoadFrom(textureName)));
+                Material = new PbrMaterial(BasicColor, specularMap: new TextureInfo(Texture.LoadFrom(textureName)));
             }
             else
             {
                 Material.SpecularMap = new TextureInfo(Texture.LoadFrom(textureName));
             }
+
             return this;
         }
-        
-        public Mesh LoadEmissiveMap(string textureName)
+
+        public Mesh LoadEmissiveMap(string textureName, float emissionFactor = 1)
         {
             if (Material is null)
             {
-                Material = new PbrMaterial(BasicColor, new TextureInfo(Texture.LoadFrom(textureName)));
+                Material = new PbrMaterial(BasicColor, emissiveMap: new TextureInfo(Texture.LoadFrom(textureName)))
+                {
+                    EmissionFactor = emissionFactor
+                };
             }
             else
             {
                 Material.EmissiveMap = new TextureInfo(Texture.LoadFrom(textureName));
+                Material.EmissionFactor = emissionFactor;
             }
+
             return this;
         }
-        
+
         public Mesh LoadNormalMap(string textureName)
         {
             if (Material is null)
@@ -110,6 +117,7 @@ namespace Aristarete.Meshes
             {
                 Material.NormalMap = new TextureInfo(Texture.LoadFrom(textureName));
             }
+
             return this;
         }
 
