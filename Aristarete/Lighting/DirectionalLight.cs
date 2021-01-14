@@ -16,7 +16,7 @@ namespace Aristarete.Lighting
             var diff = Saturate(Position.Dot(n));
 
             
-            var spec = diff > 0 ? MathF.Pow(MathF.Max(Dot(v, r), 0), 8 * (1 - renderable.Material.GetSpecular(vertex.UV).R)) : 0;
+            var spec = diff > 0 ? MathF.Pow(MathF.Max(Dot(v, r), 0), Shininess * (1 - renderable.Material.GetSpecular(vertex.UV).R)) : 0;
 
             return Saturate(Ambient + Diffuse * diff + Specular * spec).AlphaToOne() + renderable.Material.GetEmissive(vertex.UV);
         }

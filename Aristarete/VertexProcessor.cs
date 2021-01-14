@@ -11,6 +11,11 @@ namespace Aristarete
         {
             View2Proj = Matrix.CreatePerspective(fieldOfView, aspect, zNear, zFar);
         }
+        
+        public void SetOrthographic(float width, float height, float zNear, float zFar)
+        {
+            View2Proj = Matrix.CreateOrthographic(width, height, zNear, zFar);
+        }
 
         public void SetLookAt(Float3 eye, Float3 center, Float3 up)
         {

@@ -60,14 +60,14 @@ namespace Aristarete.Rendering
                 Shininess = 32
             });
             //
-            Statics.Lights.Add(new PointLight
-            {
-                Position = Float3.Back * 5 + Float3.Left * 5,
-                Ambient = FloatColor.Black,
-                Diffuse = FloatColor.Green,
-                Specular = FloatColor.White,
-                Shininess = 32
-            });
+            // Statics.Lights.Add(new PointLight
+            // {
+            //     Position = Float3.Back * 5 + Float3.Left * 5,
+            //     Ambient = FloatColor.Black,
+            //     Diffuse = FloatColor.Green,
+            //     Specular = FloatColor.White,
+            //     Shininess = 32
+            // });
             // Statics.Lights.Add(new PointLight()
             // {
             //     Position = Float3.Up + Float3.Left*10,

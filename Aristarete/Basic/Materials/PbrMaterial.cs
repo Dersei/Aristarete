@@ -45,8 +45,8 @@ namespace Aristarete.Basic.Materials
         public FloatColor GetDiffuse(Float2 uv)
         {
             var texelColor = DiffuseMap?.GetColor(uv);
-            if (texelColor != null) return texelColor.Value;
-            return FloatColor.Error;
+            if (texelColor != null) return texelColor.Value * Color;
+            return Color;
         }
         
         public FloatColor GetSpecular(Float2 uv)

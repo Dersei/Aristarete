@@ -506,6 +506,24 @@ namespace Aristarete.Basic
 
             return result;
         }
+        
+        /// <summary>Creates an orthographic perspective matrix from the given view volume dimensions.</summary>
+        /// <param name="width">Width of the view volume.</param>
+        /// <param name="height">Height of the view volume.</param>
+        /// <param name="zNearPlane">Minimum Z-value of the view volume.</param>
+        /// <param name="zFarPlane">Maximum Z-value of the view volume.</param>
+        /// <returns>The orthographic projection matrix.</returns>
+        public static Matrix CreateOrthographic(float width, float height, float zNearPlane, float zFarPlane)
+        {
+            Matrix result = Identity;
+ 
+            result.M11 = 2.0f / width;
+            result.M22 = 2.0f / height;
+            result.M33 = 1.0f / (zNearPlane - zFarPlane);
+            result.M34 = zNearPlane / (zNearPlane - zFarPlane);
+ 
+            return result;
+        }
 
         public static readonly Matrix Zero = new Matrix(new Float4(0, 0, 0, 0),
             new Float4(0, 0, 0, 0),

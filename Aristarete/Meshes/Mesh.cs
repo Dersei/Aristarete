@@ -13,7 +13,7 @@ namespace Aristarete.Meshes
         public Vertex[] Vertices = null!;
         public Int3[] Indices = null!;
         public readonly VertexProcessor VertexProcessor;
-        public FloatColor BasicColor = FloatColor.Error;
+        private readonly FloatColor _basicColor;
         public Matrix Object2World = Matrix.Identity;
         public Matrix Object2Projection = Matrix.Identity;
         public Matrix Object2View = Matrix.Identity;
@@ -23,9 +23,28 @@ namespace Aristarete.Meshes
 
         public PbrMaterial? Material { get; set; }
 
-        protected Mesh(VertexProcessor vertexProcessor)
+        public FloatColor BasicColor
+        {
+            get => _basicColor;
+            init
+            {
+                if (Material is null)
+                {
+                    Material = new PbrMaterial(value);
+                }
+                else
+                {
+                    Material.Color = value;
+                }
+
+                _basicColor = value;
+            }
+        }
+
+        protected Mesh(VertexProcessor vertexProcessor, FloatColor basicColor = default)
         {
             VertexProcessor = vertexProcessor;
+            Material = new PbrMaterial(basicColor);
         }
 
         public void SetIdentity()
@@ -69,7 +88,7 @@ namespace Aristarete.Meshes
             }
             else
             {
-                Material.SpecularMap = new TextureInfo(Texture.LoadFrom(textureName));
+                Material.DiffuseMap = new TextureInfo(Texture.LoadFrom(textureName));
             }
 
             return this;
@@ -151,78 +170,20 @@ namespace Aristarete.Meshes
             {
                 var face = Indices[i];
                 var screenCoords = new Float3[3];
-                var worldCoords = new Float3[3];
 
                 for (var j = 0; j < 3; j++)
                 {
                     var v = Vertices[face[j]].Position;
                     screenCoords[j] = Apply(v);
-                    worldCoords[j] = v;
                 }
 
-                switch (LightingMode)
-                {
-                    case LightingMode.Vertex:
-                    {
-                        var colorA = FloatColor.Black;
-                        var colorB = FloatColor.Black;
-                        var colorC = FloatColor.Black;
-
-                        foreach (var light in Statics.Lights)
-                        {
-                            colorA += light.Calculate(Vertices[Indices[i].X], this);
-                            colorB += light.Calculate(Vertices[Indices[i].Y], this);
-                            colorC += light.Calculate(Vertices[Indices[i].Z], this);
-                        }
-
-                        rasterizer.TriangleVertices(screenCoords, this);
-                        break;
-                    }
-
-                    case LightingMode.Pixel:
-                    {
-                        if (Material is null)
-                        {
-                            rasterizer.Triangle(new[]
-                                {
-                                    Vertices[Indices[i].X],
-                                    Vertices[Indices[i].Y],
-                                    Vertices[Indices[i].Z]
-                                },
-                                screenCoords, this);
-                        }
-                        else
-                        {
-                            rasterizer.TriangleMaterial(new[]
-                                {
-                                    Vertices[Indices[i].X],
-                                    Vertices[Indices[i].Y],
-                                    Vertices[Indices[i].Z]
-                                },
-                                screenCoords, this);
-                        }
-
-                        break;
-                    }
-                    case LightingMode.None:
-                    {
-                        if (Material is null)
-                        {
-                            rasterizer.TriangleVertices(screenCoords, this);
-                        }
-                        else
-                        {
-                            rasterizer.TriangleVertices(new[]
-                            {
-                                Vertices[Indices[i].X],
-                                Vertices[Indices[i].Y],
-                                Vertices[Indices[i].Z]
-                            }, screenCoords, this);
-                        }
-
-                        break;
-                    }
-                }
+                rasterizer.TrianglePixel(new Triangle(
+                        Vertices[Indices[i].X],
+                        Vertices[Indices[i].Y],
+                        Vertices[Indices[i].Z]
+                    ),
+                    screenCoords,
+                    this, LightingMode);
             }
         }
 
