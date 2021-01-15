@@ -1,4 +1,5 @@
-﻿using Aristarete.Basic;
+﻿using System;
+using Aristarete.Basic;
 using Aristarete.Models;
 
 namespace Aristarete
@@ -6,13 +7,13 @@ namespace Aristarete
     public class RenderObject : IRenderable
     {
         public VertexProcessor VertexProcessor { get; }
-        public Model Model { get; }
+        public Model2 Model { get; }
         public Matrix Object2World = Matrix.Identity;
         public Matrix Object2Projection = Matrix.Identity;
         public Matrix Object2View = Matrix.Identity;
         private bool _isDirty= true;
 
-        public RenderObject(VertexProcessor vertexProcessor, Model model)
+        public RenderObject(VertexProcessor vertexProcessor, Model2 model)
         {
             VertexProcessor = vertexProcessor;
             Model = model;
@@ -69,23 +70,24 @@ namespace Aristarete
                 SetIdentity();
             }
            
-            for (var i = 0; i < Model.Faces.Count; i++)
+            for (var i = 0; i < Model.Triangles.Count; i++)
             {
-                var face = Model.GetFace(i);
+                var face = Model.Triangles[i];
                 var screenCoords = new Float3[3];
-                var worldCoords = new Float3[3];
 
                 for (var j = 0; j < 3; j++)
                 {
-                    var v = Model.Vertices[face[j]];
-                    screenCoords[j] = Apply(v);
-                    worldCoords[j] = v;
+                    var v = face[j];
+                    screenCoords[j] = Apply(v.Position);
                 }
 
                 var uv = new Float2[3];
                 for (var k = 0; k < 3; k++)
                 {
-                    uv[k] = Model.GetUV(i, k);
+                    uv[k] = face[k].UV;
+                   uv[k] = new Float2(1 - MathF.Min(uv[k].Y, 1.0f),
+                       1 - MathF.Min(uv[k].X, 1.0f));
+                  // Console.WriteLine(uv[k]);
                 }
 
                 rasterizer.Triangle(screenCoords, uv, Model);

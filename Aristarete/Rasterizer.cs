@@ -129,7 +129,7 @@ namespace Aristarete
         }
 
 
-        public void Triangle(Float3[] vertices, Float2[] uvs, Model model)
+        public void Triangle(Float3[] vertices, Float2[] uvs, Model2 model)
         {
             vertices[0] = ToBufferCoords(vertices[0]);
             vertices[1] = ToBufferCoords(vertices[1]);
@@ -166,7 +166,7 @@ namespace Aristarete
                         if (barycentricHelper.FirstEdge || barycentricHelper.SecondEdge || barycentricHelper.ThirdEdge)
                         {
                             var uv = uvs[0] * barycentric.X + uvs[1] * barycentric.Y + uvs[2] * barycentric.Z;
-                            var color = model.GetDiffuse(uv);
+                            var color = model.Material.GetDiffuse(uv);
                             Buffer[(int) x, (int) y] = color;
                         }
                     }

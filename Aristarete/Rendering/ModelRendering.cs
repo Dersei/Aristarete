@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Aristarete.Basic;
+using Aristarete.Basic.Materials;
+using Aristarete.Basic.Textures;
 using Aristarete.Extensions;
 using Aristarete.Inputting;
 using Aristarete.Lighting;
@@ -21,8 +23,8 @@ namespace Aristarete.Rendering
         private Float3 _cameraRotationStop = new(3, 0, 0);
         private int _cameraRotationSwitch;
         private readonly Float3 _eye = new(0, 0, 2);
-        private readonly Model _model = new("_Resources/crystal.obj");
-        private readonly Model _modelGreen = new("_Resources/crystal.obj", "_Resources/crystal_green_diffuse.png");
+        private readonly Model2 _model = Model2.LoadFromFile("_Resources/crystal.obj", new PbrMaterial(FloatColor.White, new TextureInfo(Texture.LoadFrom("_Resources/crystal_diffuse.png"))));
+        private readonly Model2 _modelGreen = Model2.LoadFromFile("_Resources/crystal.obj", new PbrMaterial(FloatColor.White, new TextureInfo(Texture.LoadFrom("_Resources/crystal_green_diffuse.png"))));
         private readonly VertexProcessor _vertexProcessor = new();
         private readonly List<IRenderable> _renderObjects = new();
 
@@ -106,27 +108,27 @@ namespace Aristarete.Rendering
                 .Translate(_translate)
                 .Rotate(_angleLeft, Float3.Up);
             
-            (_renderObjects[0] as RenderObject)!.Model.ColorAngle = FloatColor.White;
-            _renderObjects[0].Update(rasterizer);
-            
-            (_renderObjects[1] as RenderObject)!.Model.ColorAngle = FloatColor.Blue;
+            // (_renderObjects[0] as RenderObject)!.Model.ColorAngle = FloatColor.White;
+            // _renderObjects[0].Update(rasterizer);
+            //
+            // (_renderObjects[1] as RenderObject)!.Model.ColorAngle = FloatColor.Blue;
             _renderObjects[1]
                 .Scale(Float3.One / 2f)
                 .Translate(Float3.Left)
                 .Rotate(_autoAngle, Float3.Up);
             _renderObjects[1].Update(rasterizer);
             
-            (_renderObjects[2] as RenderObject)!.Model.ColorAngle = FloatColor.Red;
+            // (_renderObjects[2] as RenderObject)!.Model.ColorAngle = FloatColor.Red;
             _renderObjects[2]
                 .Scale(Float3.One)
                 .Rotate(_autoAngle, Float3.Forward)
                 .Translate(Float3.Right + Float3.Back);
             _renderObjects[2].Update(rasterizer);
             
-            (_renderObjects[3] as RenderObject)!.Model.ColorAngle = FloatColor.White *
-                                                                    MathExtensions.PingPong(
-                                                                        (float) Time.RealGameTime.TotalMilliseconds /
-                                                                        1000, 1);
+            // (_renderObjects[3] as RenderObject)!.Model.ColorAngle = FloatColor.White *
+            //                                                         MathExtensions.PingPong(
+            //                                                             (float) Time.RealGameTime.TotalMilliseconds /
+            //                                                             1000, 1);
             _renderObjects[3]
                 .Scale(Float3.One / 4)
                 .Translate(Float3.Forward / 5 + new Float3(0,MathExtensions.PingPong(

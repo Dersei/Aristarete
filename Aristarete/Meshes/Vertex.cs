@@ -14,6 +14,13 @@ namespace Aristarete.Meshes
             Normal = Float3.Zero;
             UV = Float2.Zero;
         }
+        
+        public Vertex(Float3 position, Float3 normal, Float2 uv)
+        {
+            Position = position;
+            Normal = normal;
+            UV = uv;
+        }
 
         public static implicit operator Vertex(Float3 v) => new(v.X, v.Y, v.Z);
     }

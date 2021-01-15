@@ -128,7 +128,7 @@ namespace Aristarete.Basic
         }
 
         /// <summary>
-        /// (0,0,0,0)
+        /// (0,0,0,1)
         /// </summary>
         public static FloatColor Black = new FloatColor(0, 0, 0);
 
