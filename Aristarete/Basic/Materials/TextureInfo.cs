@@ -1,4 +1,5 @@
-﻿using Aristarete.Basic.Textures;
+﻿using System.Runtime.CompilerServices;
+using Aristarete.Basic.Textures;
 
 namespace Aristarete.Basic.Materials
 {
@@ -8,6 +9,7 @@ namespace Aristarete.Basic.Materials
         public readonly Float2 Scale;
         public readonly Float2 Offset;
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public FloatColor GetColor(Float2 uv) => Texture.GetColor(uv, Scale, Offset);
 
         public TextureInfo(ITexture texture, Float2 scale, Float2 offset)

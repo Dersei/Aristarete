@@ -12,6 +12,5 @@ namespace Aristarete.Lighting
         public float Shininess;
 
         public abstract FloatColor Calculate(Vertex vertex, IRenderable renderable);
-
     }
 }

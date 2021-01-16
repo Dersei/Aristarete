@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Aristarete.Basic;
 using Aristarete.Extensions;
@@ -29,66 +28,66 @@ namespace Aristarete.Rendering
             {
                 _meshes.Add(new Sphere(_vertexProcessor, 1, 24, 24) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
                     .CreateNormals().LoadDiffuseMap("_Resources/texel_density.png")
-                    .Scale(0.3f).Translate(Float3.Up * i + Float3.Left * -2));
+                    .Scale(0.3f).Translate(Float3.Up * i + Float3.Left * -2.5f));
                 _meshes.Add(new Torus(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
                     .CreateNormals().LoadDiffuseMap("_Resources/texel_density.png")
-                    .Scale(0.3f).Translate(Float3.Up * i + Float3.Left * -1));
+                    .Scale(0.3f).Translate(Float3.Up * i + Float3.Left * -1.5f));
                 _meshes.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
                     .CreateNormals().LoadDiffuseMap("_Resources/texel_density.png")
-                    .Scale(0.3f).Rotate(45, Float3.Up + Float3.Right).Translate(Float3.Up * i + Float3.Left * 0));
+                    .Scale(0.3f).Rotate(45, Float3.Up + Float3.Right).Translate(Float3.Up * i + Float3.Left * -0.5f));
                 _meshes.Add(new Tube(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
                     .CreateNormals().LoadDiffuseMap("_Resources/texel_density.png")
-                    .Scale(0.3f).Rotate(45, Float3.Right).Translate(Float3.Up * i + Float3.Left * 1));
+                    .Scale(0.3f).Rotate(45, Float3.Right).Translate(Float3.Up * i + Float3.Left * 0.5f));
                 _meshes.Add(new Cone(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
                     .CreateNormals().LoadDiffuseMap("_Resources/texel_density.png")
-                    .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Up * i + Float3.Left * 2));
+                    .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Up * i + Float3.Left * 1.5f));
                 _meshes.Add(new Cylinder(_vertexProcessor) {BasicColor = FloatColor.White, LightingMode = (LightingMode)(i+1)}
                     .CreateNormals().LoadDiffuseMap("_Resources/texel_density.png")
-                    .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Up * i + Float3.Left * 3));
+                    .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Up * i + Float3.Left * 2.5f));
             }
             
             _meshes.Add(new Sphere(_vertexProcessor, 1, 24, 24) {BasicColor = FloatColor.White}
                 .CreateNormals()
-                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
-                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
-                .LoadEmissiveMap("_Resources/circuitry-emission.png")
-                .LoadNormalMap("_Resources/circuitry-normals.png")
-                .Scale(0.3f).Translate(Float3.Left * -2));
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png", 2)
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png", 2)
+                .LoadEmissiveMap("_Resources/circuitry-emission.png", scale: 2)
+                .LoadNormalMap("_Resources/circuitry-normals.png", 2)
+                .Scale(0.3f).Translate(Float3.Left * -2.5f));
             _meshes.Add(new Torus(_vertexProcessor) {BasicColor = FloatColor.White}
                 .CreateNormals()
-                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
-                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
-                .LoadEmissiveMap("_Resources/circuitry-emission.png")
-                .LoadNormalMap("_Resources/circuitry-normals.png")
-                .Scale(0.3f).Translate(Float3.Left * -1));
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png", 2)
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png", 2)
+                .LoadEmissiveMap("_Resources/circuitry-emission.png", scale: 2)
+                .LoadNormalMap("_Resources/circuitry-normals.png", 2)
+                .Scale(0.3f).Translate(Float3.Left * -1.5f));
             _meshes.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.White}
                 .CreateNormals()
-                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
-                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
-                .LoadEmissiveMap("_Resources/circuitry-emission.png")
-                .LoadNormalMap("_Resources/circuitry-normals.png")
-                .Scale(0.3f).Rotate(45, Float3.Up + Float3.Right).Translate(Float3.Left * 0));
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png", 2)
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png", 2)
+                .LoadEmissiveMap("_Resources/circuitry-emission.png", scale:2)
+                .LoadNormalMap("_Resources/circuitry-normals.png", 2)
+                .Scale(0.3f).Rotate(45, Float3.Up + Float3.Right).Translate(Float3.Left * -0.5f));
             _meshes.Add(new Tube(_vertexProcessor) {BasicColor = FloatColor.White}
                 .CreateNormals()
-                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
-                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
-                .LoadEmissiveMap("_Resources/circuitry-emission.png")
-                .LoadNormalMap("_Resources/circuitry-normals.png")
-                .Scale(0.3f).Rotate(45, Float3.Right).Translate(Float3.Left * 1));
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png", 2)
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png", 2)
+                .LoadEmissiveMap("_Resources/circuitry-emission.png", scale:2)
+                .LoadNormalMap("_Resources/circuitry-normals.png", 2)
+                .Scale(0.3f).Rotate(45, Float3.Right).Translate(Float3.Left * 0.5f));
             _meshes.Add(new Cone(_vertexProcessor) {BasicColor = FloatColor.White}
                 .CreateNormals()
-                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
-                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
-                .LoadEmissiveMap("_Resources/circuitry-emission.png")
-                .LoadNormalMap("_Resources/circuitry-normals.png")
-                .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Left * 2));
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png", 2)
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png", 2)
+                .LoadEmissiveMap("_Resources/circuitry-emission.png", scale: 2)
+                .LoadNormalMap("_Resources/circuitry-normals.png", 2)
+                .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Left * 1.5f));
             _meshes.Add(new Cylinder(_vertexProcessor) {BasicColor = FloatColor.White}
                 .CreateNormals()
-                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
-                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
-                .LoadEmissiveMap("_Resources/circuitry-emission.png")
-                .LoadNormalMap("_Resources/circuitry-normals.png")
-                .Scale(0.3f).Rotate(30, Float3.Left).Translate(Float3.Left * 3));
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png", 2)
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png", 2)
+                .LoadEmissiveMap("_Resources/circuitry-emission.png", scale: 2)
+                .LoadNormalMap("_Resources/circuitry-normals.png", 2)
+                .Scale(0.3f).Rotate(120, Float3.Up).Rotate(30, Float3.Left).Translate(Float3.Left * 2.5f));
 
             Statics.Lights.Add(new DirectionalLight
             {
@@ -107,7 +106,8 @@ namespace Aristarete.Rendering
                 Specular = FloatColor.White,
                 Shininess = 32,
                 Direction = (Float3.Forward + Float3.Right / 50),
-                Angle = 5
+                Angle = 5,
+                OuterConeAngle = 7
             });
 
             Statics.Lights.Add(new SpotLight
@@ -118,7 +118,8 @@ namespace Aristarete.Rendering
                 Specular = FloatColor.White,
                 Shininess = 32,
                 Direction = Float3.Forward,
-                Angle = 5
+                Angle = 5,
+                OuterConeAngle = 7
             });
 
             Statics.Lights.Add(new SpotLight
@@ -129,9 +130,10 @@ namespace Aristarete.Rendering
                 Specular = FloatColor.White,
                 Shininess = 32,
                 Direction = Float3.Forward,
-                Angle = 5
+                Angle = 5,
+                OuterConeAngle = 7
             });
-            //
+
             // Statics.Lights.Add(new PointLight
             // {
             //     Position = Float3.Back * 5 + Float3.Right * 2,
@@ -182,9 +184,10 @@ namespace Aristarete.Rendering
             var g1 = MathExtensions.Lerp(-1, 1,
                 MathExtensions.PingPong((float) Time.RealGameTime.TotalMilliseconds / 1000, 1));
             g1 /= 4f;
-            (Statics.Lights[1] as SpotLight).Direction = (Float3.Forward + Float3.Right * g1);
-            (Statics.Lights[2] as SpotLight).Position = new Float3(0, 0, 5) + 2 * Float3.Right + Float3.Up * g1;
-            (Statics.Lights[3] as SpotLight).Angle = g * 7 + 1;
+            (Statics.Lights[1] as SpotLight)!.Direction = Float3.Forward + Float3.Right * g1;
+            (Statics.Lights[2] as SpotLight)!.Position = new Float3(0, 0, 5) + 2 * Float3.Right + Float3.Up * g1;
+            (Statics.Lights[3] as SpotLight)!.Angle = g * 7 + 1;
+            (Statics.Lights[3] as SpotLight)!.OuterConeAngle = g * 7 + 3;
 
             Parallel.ForEach(_meshes, mesh =>
             {
@@ -192,13 +195,6 @@ namespace Aristarete.Rendering
                 mesh.Rotate(_angleUp, Float3.Left);
                 mesh.Update(rasterizer);
             });
-            //
-            // foreach (var mesh in _meshes)
-            // {
-            //     mesh.Rotate(_angleLeft, Float3.Up);
-            //     mesh.Rotate(_angleUp, Float3.Left);
-            //     mesh.Update(rasterizer);
-            // }
         }
     }
 }

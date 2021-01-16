@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using System.Timers;
 using Aristarete.Basic;
 using Aristarete.Rendering;
 using static Aristarete.Extensions.MathExtensions;
@@ -10,7 +10,7 @@ namespace Aristarete
 {
     public class Raymarcher : IRendering
     {
-        private Stopwatch _timer = new Stopwatch();
+        private Stopwatch _timer = new();
         private float _time;
         private float _cosTime;
 
@@ -19,9 +19,9 @@ namespace Aristarete
             _timer.Start();
         }
 
-        float mSmoothMinLerp(float a, float b, float k)
+        private static float SmoothMinLerp(float a, float b, float k)
         {
-            float h = Clamp(0.5f + 0.5f * (b - a) / k, 0.0f, 1.0f);
+            var h = Clamp(0.5f + 0.5f * (b - a) / k, 0.0f, 1.0f);
             return Lerp(b, a, h) - k * h * (1.0f - h);
         }
 
@@ -40,7 +40,7 @@ namespace Aristarete
             var s1 = p.Length - 0.5f;
             var s2 = (p + new Float3(_cosTime, _cosTime, 0)).Length - 0.2f;
             var s3 = (p + new Float3(_cosTime, -_cosTime, 0)).Length - 0.2f;
-            return mSmoothMinLerp(mSmoothMinLerp(s1, s2, 1), s3, 1);
+            return SmoothMinLerp(SmoothMinLerp(s1, s2, 1), s3, 1);
         }
 
         private bool SphereTrace(in Float3 orig, in Float3 dir, out Float3 pos)
@@ -66,6 +66,7 @@ namespace Aristarete
 
         private Float3[]? _lookup;
 
+        [MemberNotNull(nameof(_lookup))]
         private void GenerateLookup(int width, int height, float fov)
         {
             if (_lookup is not null) return;
@@ -85,7 +86,7 @@ namespace Aristarete
             }
         }
 
-        FloatColor PostEffect(Float3 endPos)
+        private FloatColor PostEffect(Float3 endPos)
         {
             var s1 = endPos.Length - 0.5f;
             var s2 = (endPos + new Float3(_cosTime, _cosTime, 0)).Length - 0.2f;

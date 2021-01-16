@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Aristarete.Basic;
 using Aristarete.Basic.Materials;
 using Aristarete.Basic.Textures;
@@ -23,8 +24,8 @@ namespace Aristarete.Rendering
         private Float3 _cameraRotationStop = new(3, 0, 0);
         private int _cameraRotationSwitch;
         private readonly Float3 _eye = new(0, 0, 2);
-        private readonly Model2 _model = Model2.LoadFromFile("_Resources/crystal.obj", new PbrMaterial(FloatColor.White, new TextureInfo(Texture.LoadFrom("_Resources/crystal_diffuse.png"))));
-        private readonly Model2 _modelGreen = Model2.LoadFromFile("_Resources/crystal.obj", new PbrMaterial(FloatColor.White, new TextureInfo(Texture.LoadFrom("_Resources/crystal_green_diffuse.png"))));
+        private readonly Model _model = Model.LoadFromFile("_Resources/crystal.obj", new PbrMaterial(FloatColor.White, new TextureInfo(Texture.LoadFrom("_Resources/crystal_diffuse.png"))));
+       private readonly Model _modelGreen = Model.LoadFromFile("_Resources/crystal.obj", new PbrMaterial(FloatColor.White, new TextureInfo(Texture.LoadFrom("_Resources/crystal_diffuse_32.png"))));
         private readonly VertexProcessor _vertexProcessor = new();
         private readonly List<IRenderable> _renderObjects = new();
 
@@ -36,17 +37,35 @@ namespace Aristarete.Rendering
             _renderObjects.Add(new RenderObject(_vertexProcessor, _model));
             _renderObjects.Add(new RenderObject(_vertexProcessor, _model));
             _renderObjects.Add(new RenderObject(_vertexProcessor, _model));
-            _renderObjects.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.White}.CreateNormals());
+            _renderObjects.Add(new Cube(_vertexProcessor) {BasicColor = FloatColor.White, LiveUpdate = true}
+                .CreateNormals()
+                .LoadDiffuseMap("_Resources/circuitry-albedo.png")
+                .LoadSpecularMap("_Resources/circuitry-smoothness.png")
+                .LoadEmissiveMap("_Resources/circuitry-emission.png")
+                .LoadNormalMap("_Resources/circuitry-normals.png"));
             
             
             Statics.Lights.Add(new DirectionalLight
             {
-                Position = Float3.Forward.Normalize(),
+                Position = Float3.Left.Normalize(),
                 Ambient = FloatColor.Black,
-                Diffuse = FloatColor.Red,
+                Diffuse = FloatColor.White,
                 Specular = FloatColor.White,
                 Shininess = 32
             });
+            
+            Statics.Lights.Add(new SpotLight
+            {
+                Position = new Float3(0, 0, 5),
+                Ambient = FloatColor.Black,
+                Diffuse = FloatColor.White,
+                Specular = FloatColor.White,
+                Shininess = 32,
+                Direction = Float3.Forward,
+                Angle = 5,
+                OuterConeAngle = 7
+            });
+
         }
 
         public void Run(Rasterizer rasterizer)
@@ -108,43 +127,35 @@ namespace Aristarete.Rendering
                 .Translate(_translate)
                 .Rotate(_angleLeft, Float3.Up);
             
-            // (_renderObjects[0] as RenderObject)!.Model.ColorAngle = FloatColor.White;
-            // _renderObjects[0].Update(rasterizer);
-            //
-            // (_renderObjects[1] as RenderObject)!.Model.ColorAngle = FloatColor.Blue;
-            _renderObjects[1]
-                .Scale(Float3.One / 2f)
-                .Translate(Float3.Left)
-                .Rotate(_autoAngle, Float3.Up);
-            _renderObjects[1].Update(rasterizer);
+             _renderObjects[1]
+                 .Scale(Float3.One / 2f)
+                 .Translate(Float3.Left)
+                 .Rotate(_autoAngle, Float3.Up);
             
-            // (_renderObjects[2] as RenderObject)!.Model.ColorAngle = FloatColor.Red;
             _renderObjects[2]
                 .Scale(Float3.One)
                 .Rotate(_autoAngle, Float3.Forward)
                 .Translate(Float3.Right + Float3.Back);
-            _renderObjects[2].Update(rasterizer);
-            
-            // (_renderObjects[3] as RenderObject)!.Model.ColorAngle = FloatColor.White *
-            //                                                         MathExtensions.PingPong(
-            //                                                             (float) Time.RealGameTime.TotalMilliseconds /
-            //                                                             1000, 1);
+
             _renderObjects[3]
                 .Scale(Float3.One / 4)
                 .Translate(Float3.Forward / 5 + new Float3(0,MathExtensions.PingPong(
                     (float) Time.RealGameTime.TotalMilliseconds /
                     1000, 2) - 1,0))
                 .Rotate(180, Float3.Forward);
-            _renderObjects[3].Update(rasterizer);
 
-            var scaleUnit = (MathExtensions.PingPong((float) Time.RealGameTime.TotalMilliseconds / 1000, 1) + 1) / 16;
+            var scaleUnit = (MathExtensions.PingPong((float) Time.RealGameTime.TotalMilliseconds / 1000, 1) + 1) / 4;
             var scale = new Float3(scaleUnit);
             _renderObjects[4]
                 .Scale(scale)
                 .Rotate(20, Float3.Up)
                 .Rotate(35f, Float3.Left)
                 .Translate((Float3.Left + Float3.Up) / 2);
-            _renderObjects[4].Update(rasterizer);
+            
+            Parallel.ForEach(_renderObjects, mesh =>
+            {
+                mesh.Update(rasterizer);
+            });
         }
     }
 }

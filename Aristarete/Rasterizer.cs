@@ -33,7 +33,8 @@ namespace Aristarete
         private static readonly (FloatColor first, FloatColor second, FloatColor third) LightingNoneColors = (
             FloatColor.White, FloatColor.White, FloatColor.White);
 
-        private static (FloatColor first, FloatColor second, FloatColor third) CalculateLight(in Triangle triangle, IRenderable mesh, Float3 barycentric, LightingMode mode)
+        private static (FloatColor first, FloatColor second, FloatColor third) CalculateLight(in Triangle triangle,
+            IRenderable mesh, Float3 barycentric, LightingMode mode)
         {
             switch (mode)
             {
@@ -51,7 +52,10 @@ namespace Aristarete
                         colorC += light.Calculate(triangle.Third, mesh);
                     }
 
-                    return (colorA, colorB, colorC);
+                    return (
+                        colorA, 
+                        colorB, 
+                        colorC);
                 }
                 case LightingMode.Pixel:
                 {
@@ -59,7 +63,7 @@ namespace Aristarete
                     {
                         Position = triangle.First.Position * barycentric.X + triangle.Second.Position * barycentric.Y +
                                    triangle.Third.Position * barycentric.Z,
-                        Normal = triangle.First.Normal * barycentric.X +triangle.Second.Normal * barycentric.Y +
+                        Normal = triangle.First.Normal * barycentric.X + triangle.Second.Normal * barycentric.Y +
                                  triangle.Third.Normal * barycentric.Z,
                         UV = triangle.First.UV * barycentric.X + triangle.Second.UV * barycentric.Y +
                              triangle.Third.UV * barycentric.Z
@@ -71,14 +75,17 @@ namespace Aristarete
                         colorLight += light.Calculate(vertex, mesh);
                     }
 
-                    return (colorLight, colorLight, colorLight);
+                    return (
+                        colorLight, 
+                        colorLight, 
+                        colorLight);
                 }
             }
 
             throw new IndexOutOfRangeException();
         }
 
-        public void TrianglePixel(in Triangle triangle, Float3[] screenCords, IRenderable mesh, LightingMode mode)
+        public void Triangle(in Triangle triangle, Float3[] screenCords, IRenderable mesh, LightingMode mode)
         {
             screenCords[0] = ToBufferCoords(screenCords[0]);
             screenCords[1] = ToBufferCoords(screenCords[1]);
@@ -110,64 +117,21 @@ namespace Aristarete
                     var zCoord = (int) (x + y * _width);
                     if (z < ZBuffer[zCoord])
                     {
+                        var uv = triangle.First.UV * barycentric.X + triangle.Second.UV * barycentric.Y +
+                                 triangle.Third.UV * barycentric.Z;
+                        if(mesh.Material.GetOpacity(uv).R == 0) continue;
                         ZBuffer[zCoord] = z;
                         if (barycentricHelper.FirstEdge || barycentricHelper.SecondEdge || barycentricHelper.ThirdEdge)
                         {
                             var lightColors = CalculateLight(triangle, mesh, barycentric, mode);
 
-                            var uv = triangle.First.UV * barycentric.X + triangle.Second.UV * barycentric.Y +
-                                     triangle.Third.UV * barycentric.Z;
+                           
                             var textureColor = mesh.Material.GetDiffuse(uv);
+                            var emissiveColor = mesh.Material.GetEmissive(uv);
                             Buffer[(int) x, (int) y] =
-                                lightColors.first * textureColor * barycentric.X +
+                                lightColors.first * textureColor * barycentric.X  +
                                 lightColors.second * textureColor * barycentric.Y +
-                                lightColors.third * textureColor * barycentric.Z;
-                        }
-                    }
-                }
-            }
-        }
-
-
-        public void Triangle(Float3[] vertices, Float2[] uvs, Model2 model)
-        {
-            vertices[0] = ToBufferCoords(vertices[0]);
-            vertices[1] = ToBufferCoords(vertices[1]);
-            vertices[2] = ToBufferCoords(vertices[2]);
-
-            var bBoxMin = new Float2(float.MaxValue, float.MaxValue);
-            var bBoxMax = new Float2(float.MinValue, float.MinValue);
-            var clamp = new Float2(_width - 1, _height - 1);
-
-            for (var i = 0; i < 3; i++)
-            {
-                bBoxMin = Float2.MinAbsolute(bBoxMin, vertices[i].XY);
-                bBoxMax = Float2.MaxClamped(bBoxMax, vertices[i].XY, clamp);
-            }
-
-            var barycentricHelper = new BarycentricHelper(vertices[0], vertices[1], vertices[2]);
-
-            for (var x = bBoxMin.X; x <= bBoxMax.X; x++)
-            {
-                for (var y = bBoxMin.Y; y <= bBoxMax.Y; y++)
-                {
-                    var barycentric = barycentricHelper.Calculate(x, y);
-                    if (barycentric.X < 0 || barycentric.Y < 0 || barycentric.Z < 0) continue;
-                    float z = 0;
-                    z += 1f / vertices[0].Z * barycentric.X;
-                    z += 1f / vertices[1].Z * barycentric.Y;
-                    z += 1f / vertices[2].Z * barycentric.Z;
-                    z = 1f / z;
-                    var zCoord = (int) (x + y * _width);
-                    if (z < ZBuffer[zCoord])
-                    {
-                        ZBuffer[zCoord] = z;
-
-                        if (barycentricHelper.FirstEdge || barycentricHelper.SecondEdge || barycentricHelper.ThirdEdge)
-                        {
-                            var uv = uvs[0] * barycentric.X + uvs[1] * barycentric.Y + uvs[2] * barycentric.Z;
-                            var color = model.Material.GetDiffuse(uv);
-                            Buffer[(int) x, (int) y] = color;
+                                lightColors.third * textureColor * barycentric.Z + emissiveColor;
                         }
                     }
                 }
@@ -195,7 +159,7 @@ namespace Aristarete
             public readonly bool SecondEdge;
             public readonly bool ThirdEdge;
 
-            public BarycentricHelper(Float3 v1, Float3 v2, Float3 v3)
+            public BarycentricHelper(in Float3 v1, in Float3 v2, in Float3 v3)
             {
                 Dx12 = v1.X - v2.X;
                 Dx13 = v1.X - v3.X;

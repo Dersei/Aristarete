@@ -10,15 +10,17 @@ namespace Aristarete.Lighting
     {
         public override FloatColor Calculate(Vertex vertex, IRenderable renderable)
         {
-            var n = renderable.TransformNormals(vertex.Normal + renderable.Material.GetNormals(vertex.UV)).NormalizeUnsafe();
+            var n = renderable.TransformNormals(vertex.Normal)
+                .NormalizeUnsafe() + renderable.Material.GetNormals(vertex.UV);
+            n = n.NormalizeUnsafe();
             var v = renderable.ApplyView(-vertex.Position).NormalizeUnsafe();
             var r = Position.Reflect(n);
             var diff = Saturate(Position.Dot(n));
+            var spec = diff > 0
+                ? MathF.Pow(MathF.Max(Dot(v, r), 0), Shininess * (1 - renderable.Material.GetSpecular(vertex.UV).R))
+                : 0;
 
-            
-            var spec = diff > 0 ? MathF.Pow(MathF.Max(Dot(v, r), 0), Shininess * (1 - renderable.Material.GetSpecular(vertex.UV).R)) : 0;
-
-            return Saturate(Ambient + Diffuse * diff + Specular * spec).AlphaToOne() + renderable.Material.GetEmissive(vertex.UV);
+            return Saturate(Ambient + Diffuse * diff + Specular * spec).AlphaToOne();
         }
     }
 }

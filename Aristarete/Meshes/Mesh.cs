@@ -1,10 +1,8 @@
-﻿using System;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Windows.Media.Imaging;
 using Aristarete.Basic;
 using Aristarete.Basic.Materials;
 using Aristarete.Basic.Textures;
-using Aristarete.Extensions;
 
 namespace Aristarete.Meshes
 {
@@ -12,31 +10,23 @@ namespace Aristarete.Meshes
     {
         public Vertex[] Vertices = null!;
         public Int3[] Indices = null!;
-        public readonly VertexProcessor VertexProcessor;
-        private readonly FloatColor _basicColor;
+        public readonly VertexProcessor VertexProcessor = null!;
+        private FloatColor _basicColor;
         public Matrix Object2World = Matrix.Identity;
         public Matrix Object2Projection = Matrix.Identity;
         public Matrix Object2View = Matrix.Identity;
-        private bool _isDirty = true;
+        protected bool IsDirty = true;
         public LightingMode LightingMode = LightingMode.Pixel;
         public bool LiveUpdate = false;
 
-        public PbrMaterial? Material { get; set; }
+        public PbrMaterial Material { get; set; }
 
         public FloatColor BasicColor
         {
             get => _basicColor;
-            init
+            set
             {
-                if (Material is null)
-                {
-                    Material = new PbrMaterial(value);
-                }
-                else
-                {
-                    Material.Color = value;
-                }
-
+                Material.Color = value;
                 _basicColor = value;
             }
         }
@@ -47,6 +37,7 @@ namespace Aristarete.Meshes
             Material = new PbrMaterial(basicColor);
         }
 
+
         public void SetIdentity()
         {
             Object2World = Matrix.Identity;
@@ -55,88 +46,59 @@ namespace Aristarete.Meshes
         public IRenderable Rotate(float angle, Float3 v)
         {
             Object2World = Matrix.Rotate(angle, v) * Object2World;
-            _isDirty = true;
+            IsDirty = true;
             return this;
         }
 
         public IRenderable Translate(Float3 v)
         {
             Object2World = Matrix.Translate(v) * Object2World;
-            _isDirty = true;
+            IsDirty = true;
             return this;
         }
 
         public IRenderable Scale(Float3 v)
         {
             Object2World = Matrix.Scale(v) * Object2World;
-            _isDirty = true;
+            IsDirty = true;
             return this;
         }
 
         public IRenderable Scale(float v)
         {
             Object2World = Matrix.Scale(new Float3(v)) * Object2World;
-            _isDirty = true;
+            IsDirty = true;
             return this;
         }
 
-        public Mesh LoadDiffuseMap(string textureName)
+        public Mesh LoadDiffuseMap(string textureName, float scale = 1)
         {
-            if (Material is null)
-            {
-                Material = new PbrMaterial(BasicColor, new TextureInfo(Texture.LoadFrom(textureName)));
-            }
-            else
-            {
-                Material.DiffuseMap = new TextureInfo(Texture.LoadFrom(textureName));
-            }
-
+            Material.DiffuseMap = new TextureInfo(Texture.LoadFrom(textureName), scale, Float2.Zero);
             return this;
         }
 
-        public Mesh LoadSpecularMap(string textureName)
+        public Mesh LoadSpecularMap(string textureName, float scale = 1)
         {
-            if (Material is null)
-            {
-                Material = new PbrMaterial(BasicColor, specularMap: new TextureInfo(Texture.LoadFrom(textureName)));
-            }
-            else
-            {
-                Material.SpecularMap = new TextureInfo(Texture.LoadFrom(textureName));
-            }
-
+            Material.SpecularMap = new TextureInfo(Texture.LoadFrom(textureName), scale, Float2.Zero);
             return this;
         }
 
-        public Mesh LoadEmissiveMap(string textureName, float emissionFactor = 1)
+        public Mesh LoadEmissiveMap(string textureName, float emissionFactor = 1, float scale = 1)
         {
-            if (Material is null)
-            {
-                Material = new PbrMaterial(BasicColor, emissiveMap: new TextureInfo(Texture.LoadFrom(textureName)))
-                {
-                    EmissionFactor = emissionFactor
-                };
-            }
-            else
-            {
-                Material.EmissiveMap = new TextureInfo(Texture.LoadFrom(textureName));
-                Material.EmissionFactor = emissionFactor;
-            }
-
+            Material.EmissiveMap = new TextureInfo(Texture.LoadFrom(textureName), scale, Float2.Zero);
+            Material.EmissionFactor = emissionFactor;
             return this;
         }
 
-        public Mesh LoadNormalMap(string textureName)
+        public Mesh LoadNormalMap(string textureName, float scale = 1)
         {
-            if (Material is null)
-            {
-                Material = new PbrMaterial(BasicColor, new TextureInfo(Texture.LoadFrom(textureName)));
-            }
-            else
-            {
-                Material.NormalMap = new TextureInfo(Texture.LoadFrom(textureName));
-            }
-
+            Material.NormalMap = new TextureInfo(Texture.LoadFrom(textureName), scale, Float2.Zero);
+            return this;
+        }
+        
+        public Mesh LoadOpacityMap(string textureName, float scale = 1)
+        {
+            Material.OpacityMap = new TextureInfo(Texture.LoadFrom(textureName), scale, Float2.Zero);
             return this;
         }
 
@@ -144,7 +106,7 @@ namespace Aristarete.Meshes
         {
             Object2View = VertexProcessor.World2View * Object2World;
             Object2Projection = VertexProcessor.View2Proj * Object2View;
-            _isDirty = false;
+            IsDirty = false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -158,9 +120,9 @@ namespace Aristarete.Meshes
 
         // public Float3 TransformNormals(Float3 f) => Matrix.MultiplyVector(Object2View,f);
 
-        public void Update(Rasterizer rasterizer)
+        public virtual void Update(Rasterizer rasterizer)
         {
-            if (_isDirty)
+            if (IsDirty)
             {
                 Transform();
                 if (LiveUpdate) SetIdentity();
@@ -177,7 +139,7 @@ namespace Aristarete.Meshes
                     screenCoords[j] = Apply(v);
                 }
 
-                rasterizer.TrianglePixel(new Triangle(
+                rasterizer.Triangle(new Triangle(
                         Vertices[Indices[i].X],
                         Vertices[Indices[i].Y],
                         Vertices[Indices[i].Z]

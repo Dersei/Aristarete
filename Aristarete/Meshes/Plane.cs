@@ -54,9 +54,9 @@ namespace Aristarete.Meshes
                 indices[j] = new Int3(triangles[j * 3], triangles[j * 3 + 1], triangles[j * 3 + 2]);
             }
 
-            for (int i = 0; i < vertices.Length; i++)
+            for (var i = 0; i < vertices.Length; i++)
             {
-                // vertices[i].Normal = vertices[1]
+                vertices[i].Normal = Float3.Down;
             }
 
             Vertices = vertices;

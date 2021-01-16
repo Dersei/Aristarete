@@ -6,6 +6,6 @@ namespace Aristarete
     public static class Statics
     {
         public static readonly List<Light> Lights = new List<Light>();
-        public static VertexProcessor VertexProcessor;
+        public static VertexProcessor? VertexProcessor;
     }
 }
