@@ -1,5 +1,4 @@
-﻿using System;
-using Aristarete.Basic.Textures;
+﻿using Aristarete.Basic.Textures;
 
 namespace Aristarete.Basic.Materials
 {
@@ -11,6 +10,7 @@ namespace Aristarete.Basic.Materials
         public TextureInfo? SpecularMap;
         public TextureInfo? NormalMap;
         public TextureInfo? OpacityMap;
+        public TextureInfo? HeightMap;
         public float EmissionFactor = 1;
 
         public static readonly PbrMaterial Error = new(FloatColor.Error,
@@ -18,7 +18,7 @@ namespace Aristarete.Basic.Materials
 
 
         public PbrMaterial(FloatColor color, TextureInfo? diffuseMap = null, TextureInfo? emissiveMap = null,
-            TextureInfo? specularMap = null, TextureInfo? normalMap = null, TextureInfo? opacityMap = null)
+            TextureInfo? specularMap = null, TextureInfo? normalMap = null, TextureInfo? opacityMap = null, TextureInfo? heightMap = null)
         {
             Color = color;
             DiffuseMap = diffuseMap;
@@ -26,6 +26,7 @@ namespace Aristarete.Basic.Materials
             SpecularMap = specularMap;
             NormalMap = normalMap;
             OpacityMap = opacityMap;
+            HeightMap = heightMap;
         }
         
         public FloatColor GetDiffuse(Float2 uv)
@@ -33,6 +34,13 @@ namespace Aristarete.Basic.Materials
             var texelColor = DiffuseMap?.GetColor(uv);
             if (texelColor != null) return texelColor.Value * Color;
             return Color;
+        }
+        
+        public FloatColor GetHeight(Float2 uv)
+        {
+            var texelColor = HeightMap?.GetColor(uv);
+            if (texelColor != null) return texelColor.Value * Color;
+            return FloatColor.Black;
         }
         
         public FloatColor GetSpecular(Float2 uv)

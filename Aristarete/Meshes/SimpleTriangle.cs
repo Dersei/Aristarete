@@ -4,7 +4,7 @@ namespace Aristarete.Meshes
 {
     public class SimpleTriangle : Mesh
     {
-        public SimpleTriangle(VertexProcessor vertexProcessor) : base(vertexProcessor)
+        public SimpleTriangle()
         {
             Vertices = new Vertex[]
             {

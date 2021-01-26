@@ -92,7 +92,7 @@ namespace Aristarete.Basic
                 a.A + (b.A - a.A) * t
             );
         }
-        
+
         public static FloatColor Lerp(FloatColor a, FloatColor b, float t)
         {
             t = MathExtensions.Clamp01(t);
@@ -102,7 +102,7 @@ namespace Aristarete.Basic
                 a.B + (b.B - a.B) * t
             );
         }
-        
+
         public static FloatColor Lerp(FloatColor a, FloatColor b, FloatColor t)
         {
             var tR = MathExtensions.Clamp01(t.R);
@@ -245,6 +245,14 @@ namespace Aristarete.Basic
         public Float3 ToFloat3()
         {
             return new Float3(R, G, B);
+        }
+
+        public static FloatColor ToHdr(FloatColor color, float gamma = 2.2f, float exposure = 1.0f)
+        {
+            var r = MathF.Pow(1 - MathF.Exp(-color.R * exposure), 1.0f / gamma);
+            var g = MathF.Pow(1 - MathF.Exp(-color.G * exposure), 1.0f / gamma);
+            var b = MathF.Pow(1 - MathF.Exp(-color.B * exposure), 1.0f / gamma);
+            return new FloatColor(r, g, b);
         }
     }
 }

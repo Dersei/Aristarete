@@ -1,21 +1,24 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Aristarete.Basic;
 using Aristarete.Basic.Materials;
 using Aristarete.Basic.Textures;
+using Aristarete.Rendering;
 
 namespace Aristarete.Meshes
 {
-    public abstract class Mesh : IRenderable
+    public abstract class Mesh
     {
         public Vertex[] Vertices = null!;
         public Int3[] Indices = null!;
-        public readonly VertexProcessor VertexProcessor = null!;
+        public List<Triangle> Triangles = null!;
+        public readonly List<Float3[]> ScreenCoords = new();
+        public readonly List<Float3[]> WorldCoords = new();
         private FloatColor _basicColor;
         public Matrix Object2World = Matrix.Identity;
         public Matrix Object2Projection = Matrix.Identity;
         public Matrix Object2View = Matrix.Identity;
-        protected bool IsDirty = true;
+        public bool IsDirty = true;
         public LightingMode LightingMode = LightingMode.Pixel;
         public bool LiveUpdate = false;
 
@@ -31,9 +34,8 @@ namespace Aristarete.Meshes
             }
         }
 
-        protected Mesh(VertexProcessor vertexProcessor, FloatColor basicColor = default)
+        protected Mesh(FloatColor basicColor = default)
         {
-            VertexProcessor = vertexProcessor;
             Material = new PbrMaterial(basicColor);
         }
 
@@ -43,28 +45,28 @@ namespace Aristarete.Meshes
             Object2World = Matrix.Identity;
         }
 
-        public IRenderable Rotate(float angle, Float3 v)
+        public Mesh Rotate(float angle, Float3 v)
         {
             Object2World = Matrix.Rotate(angle, v) * Object2World;
             IsDirty = true;
             return this;
         }
 
-        public IRenderable Translate(Float3 v)
+        public Mesh Translate(Float3 v)
         {
             Object2World = Matrix.Translate(v) * Object2World;
             IsDirty = true;
             return this;
         }
 
-        public IRenderable Scale(Float3 v)
+        public Mesh Scale(Float3 v)
         {
             Object2World = Matrix.Scale(v) * Object2World;
             IsDirty = true;
             return this;
         }
 
-        public IRenderable Scale(float v)
+        public Mesh Scale(float v)
         {
             Object2World = Matrix.Scale(new Float3(v)) * Object2World;
             IsDirty = true;
@@ -95,22 +97,31 @@ namespace Aristarete.Meshes
             Material.NormalMap = new TextureInfo(Texture.LoadFrom(textureName), scale, Float2.Zero);
             return this;
         }
-        
+
         public Mesh LoadOpacityMap(string textureName, float scale = 1)
         {
             Material.OpacityMap = new TextureInfo(Texture.LoadFrom(textureName), scale, Float2.Zero);
             return this;
         }
 
-        public void Transform()
+        public Mesh LoadHeightMap(string textureName, float scale = 1)
         {
-            Object2View = VertexProcessor.World2View * Object2World;
-            Object2Projection = VertexProcessor.View2Proj * Object2View;
+            Material.HeightMap = new TextureInfo(Texture.LoadFrom(textureName), scale, Float2.Zero);
+            return this;
+        }
+
+        public void Transform(Rasterizer rasterizer)
+        {
+            Object2View = rasterizer.Camera.World2View * Object2World;
+            Object2Projection = rasterizer.Camera.View2Proj * Object2View;
             IsDirty = false;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Float3 Apply(Float3 f) => Object2Projection.MultiplyPoint(f);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Float3 ApplyWorld(Float3 f) => Object2World.MultiplyPoint(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Float3 ApplyView(Float3 f) => Object2View.MultiplyPoint(f);
@@ -120,33 +131,74 @@ namespace Aristarete.Meshes
 
         // public Float3 TransformNormals(Float3 f) => Matrix.MultiplyVector(Object2View,f);
 
+        public void UpdateCoords()
+        {
+            if (ScreenCoords.Count == 0)
+            {
+                for (var i = 0; i < Triangles.Count; i++)
+                {
+                    var triangle = Triangles[i];
+                    var screenCoords = new Float3[3];
+                    var worldCoords = new Float3[3];
+
+                    for (var j = 0; j < 3; j++)
+                    {
+                        var v = triangle[j].Position;
+                        v += triangle[j].Normal * Material.GetHeight(triangle[j].UV).R / 10f;
+                        screenCoords[j] = Apply(v);
+                        worldCoords[j] = Object2World.MultiplyPoint(v);
+                    }
+                    ScreenCoords.Add(screenCoords);
+                    WorldCoords.Add(worldCoords);
+                }
+            }
+            else
+            {
+                for (var i = 0; i < Triangles.Count; i++)
+                {
+                    var triangle = Triangles[i];
+
+                    for (var j = 0; j < 3; j++)
+                    {
+                        var v = triangle[j].Position;
+                        v += triangle[j].Normal * Material.GetHeight(triangle[j].UV).R / 10f;
+                        ScreenCoords[i][j] = Apply(v);
+                        WorldCoords[i][j] = Object2World.MultiplyPoint(v);
+                    }
+                }
+            }
+        }
+
         public virtual void Update(Rasterizer rasterizer)
         {
             if (IsDirty)
             {
-                Transform();
-                if (LiveUpdate) SetIdentity();
+                Transform(rasterizer);
+                UpdateCoords();
             }
+            //
+            // for (var i = 0; i < Triangles.Count; i++)
+            // {
+            //     rasterizer.Triangle(Triangles[i], ScreenCoords[i], this, LightingMode, renderMode);
+            // }
+
+            if (LiveUpdate) SetIdentity();
+        }
+
+        protected virtual Mesh CreateTriangles()
+        {
+            Triangles = new List<Triangle>();
 
             for (var i = 0; i < Indices.Length; i++)
             {
-                var face = Indices[i];
-                var screenCoords = new Float3[3];
-
-                for (var j = 0; j < 3; j++)
-                {
-                    var v = Vertices[face[j]].Position;
-                    screenCoords[j] = Apply(v);
-                }
-
-                rasterizer.Triangle(new Triangle(
-                        Vertices[Indices[i].X],
-                        Vertices[Indices[i].Y],
-                        Vertices[Indices[i].Z]
-                    ),
-                    screenCoords,
-                    this, LightingMode);
+                Triangles.Add(new Triangle(
+                    Vertices[Indices[i].X],
+                    Vertices[Indices[i].Y],
+                    Vertices[Indices[i].Z]
+                ));
             }
+
+            return this;
         }
 
         public Mesh CreateNormals()

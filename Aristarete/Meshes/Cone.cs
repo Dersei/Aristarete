@@ -5,80 +5,217 @@ namespace Aristarete.Meshes
 {
     public class Cone : Mesh
     {
-        private void Create(float radius, float height, int subdivisions = 10)
+        private void Create(float radius, float height, int subdivisions = 18)
         {
-            Vertex[] vertices = new Vertex[subdivisions + 2];
-            Int3[] triangles = new Int3[subdivisions * 2];
+            var bottomRadius = radius;
+            const float topRadius = .00f;
+            const int heightSeg = 1; // Not implemented yet
 
-            vertices[0] = Float3.Zero;
-            for (int i = 0, n = subdivisions - 1; i < subdivisions; i++)
-            {
-                var ratio = (float) i / n;
-                var r = ratio * (MathF.PI * 2f);
-                var x = MathF.Cos(r) * radius;
-                var z = MathF.Sin(r) * radius;
-                vertices[i + 1] = new Float3(x, 0f, z);
-            }
+            var verticesCap = subdivisions + 1;
 
-            vertices[subdivisions + 1] = new Float3(0f, height, 0f);
+            #region Vertices
 
-            // construct bottom
+// bottom + top + sides
+            Float3[] vertices = new Float3[verticesCap + verticesCap + subdivisions * heightSeg * 2 + 2];
+            var vert = 0;
+            const float _2pi = MathF.PI * 2f;
 
-            for (int i = 0, n = subdivisions - 1; i < n; i++)
-            {
-                triangles[i] = new Int3(0, i + 1, i + 2);
-            }
-
-            // construct sides
-
-            var bottomOffset = subdivisions;
-            for (int i = 0, n = subdivisions - 1; i < n; i++)
-            {
-                var offset = i + bottomOffset;
-                triangles[offset] = new Int3(i + 1, subdivisions + 1, i + 2);
-            }
-            
-            Float2[] uvs = new Float2[vertices.Length];
-            subdivisions -= 1;
 // Bottom cap
-            int u = 0;
+            vertices[vert++] = new Float3(0f, 0f, 0f);
+            while (vert <= subdivisions)
+            {
+                var rad = (float) vert / subdivisions * _2pi;
+                vertices[vert] = new Float3(MathF.Cos(rad) * bottomRadius, 0f, MathF.Sin(rad) * bottomRadius);
+                vert++;
+            }
+
+// Top cap
+            vertices[vert++] = new Float3(0f, height, 0f);
+            while (vert <= subdivisions * 2 + 1)
+            {
+                var rad = (float) (vert - subdivisions - 1) / subdivisions * _2pi;
+                vertices[vert] = new Float3(MathF.Cos(rad) * topRadius, height, MathF.Sin(rad) * topRadius);
+                vert++;
+            }
+
+// Sides
+            var v = 0;
+            while (vert <= vertices.Length - 4)
+            {
+                var rad = (float) v / subdivisions * _2pi;
+                vertices[vert] = new Float3(MathF.Cos(rad) * topRadius, height, MathF.Sin(rad) * topRadius);
+                vertices[vert + 1] = new Float3(MathF.Cos(rad) * bottomRadius, 0, MathF.Sin(rad) * bottomRadius);
+                vert += 2;
+                v++;
+            }
+
+            vertices[vert] = vertices[subdivisions * 2 + 2];
+            vertices[vert + 1] = vertices[subdivisions * 2 + 3];
+
+            #endregion
+
+            #region Normales
+
+// bottom + top + sides
+            Float3[] normals = new Float3[vertices.Length];
+            vert = 0;
+
+// Bottom cap
+            while (vert <= subdivisions)
+            {
+                normals[vert++] = Float3.Down;
+            }
+
+// Top cap
+            while (vert <= subdivisions * 2 + 1)
+            {
+                normals[vert++] = Float3.Up;
+            }
+
+// Sides
+            v = 0;
+            while (vert <= vertices.Length - 4)
+            {
+                var rad = (float) v / subdivisions * _2pi;
+                var cos = MathF.Cos(rad);
+                var sin = MathF.Sin(rad);
+
+                normals[vert] = new Float3(cos, 0f, sin);
+                normals[vert + 1] = normals[vert];
+
+                vert += 2;
+                v++;
+            }
+
+            normals[vert] = normals[subdivisions * 2 + 2];
+            normals[vert + 1] = normals[subdivisions * 2 + 3];
+
+            #endregion
+
+            #region UVs
+
+            Float2[] uvs = new Float2[vertices.Length];
+
+// Bottom cap
+            var u = 0;
             uvs[u++] = new Float2(0.5f, 0.5f);
             while (u <= subdivisions)
             {
-                float rad = (float)u / subdivisions * MathF.PI*2;
+                var rad = (float) u / subdivisions * _2pi;
                 uvs[u] = new Float2(MathF.Cos(rad) * .5f + .5f, MathF.Sin(rad) * .5f + .5f);
                 u++;
             }
-            
-// Sides
-            int uSides = 0;
-            while (u <= uvs.Length - 4 )
+
+// Top cap
+            uvs[u++] = new Float2(0.5f, 0.5f);
+            while (u <= subdivisions * 2 + 1)
             {
-                float t = (float)uSides / subdivisions;
+                var rad = (float) u / subdivisions * _2pi;
+                uvs[u] = new Float2(MathF.Cos(rad) * .5f + .5f, MathF.Sin(rad) * .5f + .5f);
+                u++;
+            }
+
+// Sides
+            var uSides = 0;
+            while (u <= uvs.Length - 4)
+            {
+                var t = (float) uSides / subdivisions;
                 uvs[u] = new Float2(t, 1f);
                 uvs[u + 1] = new Float2(t, 0f);
                 u += 2;
                 uSides++;
             }
+
             uvs[u] = new Float2(1f, 1f);
             uvs[u + 1] = new Float2(1f, 0f);
-            
-            for (var n = 0; n < vertices.Length; n++)
+
+            #endregion
+
+            #region Triangles
+
+            var trianglesNumber = subdivisions + subdivisions + subdivisions * 2;
+            int[] triangles = new int[trianglesNumber * 3 + 3];
+
+// Bottom cap
+            var tri = 0;
+            var i = 0;
+            while (tri < subdivisions - 1)
             {
-                vertices[n].UV = uvs[n];
+                triangles[i] = 0;
+                triangles[i + 1] = tri + 1;
+                triangles[i + 2] = tri + 2;
+                tri++;
+                i += 3;
             }
-            
-            Vertices = vertices;
-            Indices = triangles;
+
+            triangles[i] = 0;
+            triangles[i + 1] = tri + 1;
+            triangles[i + 2] = 1;
+            tri++;
+            i += 3;
+
+// Top cap
+//tri++;
+            while (tri < subdivisions * 2)
+            {
+                triangles[i] = tri + 2;
+                triangles[i + 1] = tri + 1;
+                triangles[i + 2] = verticesCap;
+                tri++;
+                i += 3;
+            }
+
+            triangles[i] = verticesCap + 1;
+            triangles[i + 1] = tri + 1;
+            triangles[i + 2] = verticesCap;
+            tri++;
+            i += 3;
+            tri++;
+
+// Sides
+            while (tri <= trianglesNumber)
+            {
+                triangles[i] = tri + 2;
+                triangles[i + 1] = tri + 1;
+                triangles[i + 2] = tri + 0;
+                tri++;
+                i += 3;
+
+                triangles[i] = tri + 1;
+                triangles[i + 1] = tri + 2;
+                triangles[i + 2] = tri + 0;
+                tri++;
+                i += 3;
+            }
+
+            #endregion
+
+            Vertex[] finalVertices = new Vertex[vertices.Length];
+
+            for (var j = 0; j < finalVertices.Length; j++)
+            {
+                finalVertices[j] = new Vertex(vertices[j], normals[j], uvs[j]);
+            }
+
+            Int3[] indices = new Int3[triangles.Length / 3];
+
+            for (int i0 = 0, j = 0; i0 < indices.Length; i0++, j += 3)
+            {
+                indices[i0] = new Int3(triangles[j], triangles[j + 1], triangles[j + 2]);
+            }
+
+            Vertices = finalVertices;
+            Indices = indices;
+
+            CreateTriangles();
         }
 
-        public Cone(VertexProcessor vertexProcessor) : base(vertexProcessor)
+        public Cone()
         {
             Create(1, 2, 10);
         }
 
-        public Cone(VertexProcessor vertexProcessor, float radius, float height, int subdivisions = 10) : base(
-            vertexProcessor)
+        public Cone(float radius, float height, int subdivisions = 10)
         {
             Create(radius, height, subdivisions);
         }

@@ -6,13 +6,13 @@ namespace Aristarete.Meshes
 {
     public class Torus : Mesh
     {
-        public Torus(VertexProcessor vertexProcessor, float radius1, float radius2, int radiusSegments = 24,
-            int sides = 18) : base(vertexProcessor)
+        public Torus(float radius1, float radius2, int radiusSegments = 24,
+            int sides = 18)
         {
             Create(radius1, radius2, radiusSegments, sides);
         }
 
-        public Torus(VertexProcessor vertexProcessor) : base(vertexProcessor)
+        public Torus()
         {
             Create(1, 0.3f, 24, 18);
         }
@@ -110,6 +110,8 @@ namespace Aristarete.Meshes
 
             Vertices = vertices;
             Indices = indices;
+            
+            CreateTriangles();
         }
     }
 }
