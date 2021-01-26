@@ -129,7 +129,8 @@ namespace Aristarete.Basic.Textures
             }
 
             var bitmap = new BitmapImage(new Uri(filename, UriKind.Relative));
-            var wbm = new WriteableBitmap(bitmap);
+            BitmapSource bmpSourceLeft = new FormatConvertedBitmap(bitmap, PixelFormats.Bgra32, bitmap.Palette, 1);
+            var wbm = new WriteableBitmap(bmpSourceLeft);
             wbm.Lock();
 
             var pixels = new FloatColor[bitmap.PixelWidth, bitmap.PixelHeight];
@@ -142,7 +143,7 @@ namespace Aristarete.Basic.Textures
                 if (yp > wbm.PixelHeight - 1 ||
                     xp > wbm.PixelWidth - 1)
                     return FloatColor.FromArgb(0, 1, 0, 0);
-                var loc = yp * stride + xp * (wbm.Format.BitsPerPixel/4);
+                var loc = yp * stride + xp * 4;
                 return FloatColor.FromArgb(255, bufferPointer[loc + 2], bufferPointer[loc + 1],
                     bufferPointer[loc]);
             }
@@ -159,6 +160,7 @@ namespace Aristarete.Basic.Textures
                     pixels[indexX, indexY] = GetPixel(indexX, indexY);
                 }
             }
+
             wbm.Unlock();
             var result = new Texture(bitmap.PixelWidth, bitmap.PixelHeight, pixels);
             Textures.Add(filename, result);

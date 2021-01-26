@@ -5,13 +5,12 @@ namespace Aristarete.Meshes
 {
     public class Sphere : Mesh
     {
-        public Sphere(VertexProcessor vertexProcessor) : base(vertexProcessor)
+        public Sphere()
         {
             Create(1, 24, 16);
         }
 
-        public Sphere(VertexProcessor vertexProcessor, float radius, int length = 24, int latitude = 16) : base(
-            vertexProcessor)
+        public Sphere(float radius, int length = 24, int latitude = 16)
         {
             Create(radius, length, latitude);
         }
@@ -113,6 +112,8 @@ namespace Aristarete.Meshes
 
             Vertices = vertices;
             Indices = indices;
+
+            CreateTriangles();
         }
     }
 }

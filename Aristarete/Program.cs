@@ -1,6 +1,7 @@
 ﻿using System;
 using Aristarete.Basic;
-using Aristarete.Rendering;
+using Aristarete.Scenes;
+using Buffer = Aristarete.Rendering.Buffer;
 
 namespace Aristarete
 {
@@ -11,8 +12,7 @@ namespace Aristarete
         {
             var buffer = new Buffer(1440, 720);
             buffer.Clear(FloatColor.Black);
-            var rasterizer = new Rasterizer(buffer);
-            var displayWindow = new DisplayWindow(rasterizer, new GeneratedRendering());
+            var displayWindow = new DisplayWindow(new Test(buffer));
             displayWindow.Display();
         }
     }

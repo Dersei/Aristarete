@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Aristarete.Rendering;
 
 namespace Aristarete.Imaging.TgaTools
 {

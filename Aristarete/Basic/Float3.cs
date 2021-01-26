@@ -212,6 +212,11 @@ namespace Aristarete.Basic
         {
             return new Float3(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
         }
+        
+        public static Float3 Cross(Float3 v1, Float3 v2)
+        {
+            return new Float3(v1.Y * v2.Z - v1.Z * v2.Y, v1.Z * v2.X - v1.X * v2.Z, v1.X * v2.Y - v1.Y * v2.X);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Float3 Reflect(Float3 normal)
@@ -406,6 +411,11 @@ namespace Aristarete.Basic
         public FloatColor ToFloatColor()
         {
             return new FloatColor(X, Y, Z, 1);
+        }
+
+        public Float4 ToFloat4()
+        {
+            return new Float4(X, Y, Z, 1);
         }
     }
 }

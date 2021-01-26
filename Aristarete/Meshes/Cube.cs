@@ -80,6 +80,34 @@ namespace Aristarete.Meshes
                 _11, _01, _00, _10,
             };
 
+            Float3 up 	= Float3.Up;
+            Float3 down 	= Float3.Down;
+            Float3 front 	= Float3.Forward;
+            Float3 back 	= Float3.Back;
+            Float3 left 	= Float3.Left;
+            Float3 right 	= Float3.Right;
+ 
+            Float3[] normales = new Float3[]
+            {
+                // Bottom
+                down, down, down, down,
+ 
+                // Left
+                left, left, left, left,
+ 
+                // Front
+                front, front, front, front,
+ 
+                // Back
+                back, back, back, back,
+ 
+                // Right
+                right, right, right, right,
+ 
+                // Top
+                up, up, up, up
+            };
+            
             var size = triangles.Length / 3;
             Int3[] indices = new Int3[size];
             for (var j = 0; j < size; j++)
@@ -90,18 +118,20 @@ namespace Aristarete.Meshes
             for (var n = 0; n < vertices.Length; n++)
             {
                 vertices[n].UV = uvs[n];
+                vertices[n].Normal = normales[n];
             }
             
             Vertices = vertices;
             Indices = indices;
+            CreateTriangles();
         }
 
-        public Cube(VertexProcessor vertexProcessor) : base(vertexProcessor)
+        public Cube()
         {
             Create(1, 1, 1);
         }
 
-        public Cube(VertexProcessor vertexProcessor, float length, float width, float height) : base(vertexProcessor)
+        public Cube(float length, float width, float height)
         {
             Create(length, width, height);
         }

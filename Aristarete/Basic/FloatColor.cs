@@ -82,6 +82,38 @@ namespace Aristarete.Basic
             return FromRgba(r, g, b, a);
         }
 
+        public static FloatColor LerpWithAlpha(FloatColor a, FloatColor b, float t)
+        {
+            t = MathExtensions.Clamp01(t);
+            return new FloatColor(
+                a.R + (b.R - a.R) * t,
+                a.G + (b.G - a.G) * t,
+                a.B + (b.B - a.B) * t,
+                a.A + (b.A - a.A) * t
+            );
+        }
+
+        public static FloatColor Lerp(FloatColor a, FloatColor b, float t)
+        {
+            t = MathExtensions.Clamp01(t);
+            return new FloatColor(
+                a.R + (b.R - a.R) * t,
+                a.G + (b.G - a.G) * t,
+                a.B + (b.B - a.B) * t
+            );
+        }
+
+        public static FloatColor Lerp(FloatColor a, FloatColor b, FloatColor t)
+        {
+            var tR = MathExtensions.Clamp01(t.R);
+            var tG = MathExtensions.Clamp01(t.G);
+            var tB = MathExtensions.Clamp01(t.B);
+            return new FloatColor(
+                a.R + (b.R - a.R) * tR,
+                a.G + (b.G - a.G) * tG,
+                a.B + (b.B - a.B) * tB
+            );
+        }
 
         public static FloatColor FromArgb(uint color)
         {
@@ -128,7 +160,7 @@ namespace Aristarete.Basic
         }
 
         /// <summary>
-        /// (0,0,0,0)
+        /// (0,0,0,1)
         /// </summary>
         public static FloatColor Black = new FloatColor(0, 0, 0);
 
@@ -151,6 +183,7 @@ namespace Aristarete.Basic
 
         public float Grayscale => 0.299F * R + 0.587F * G + 0.114F * B;
         public float MaxColorComponent => MathF.Max(MathF.Max(R, G), B);
+        public uint Uint => ToUint();
 
 
         public bool Equals(FloatColor other)
@@ -208,5 +241,18 @@ namespace Aristarete.Basic
         public static FloatColor AlphaToOne(FloatColor color) => new(color.R, color.G, color.B);
         public FloatColor AlphaToOne() => new(R, G, B);
         public FloatColor WithAlpha(float a) => new(R, G, B, a);
+
+        public Float3 ToFloat3()
+        {
+            return new Float3(R, G, B);
+        }
+
+        public static FloatColor ToHdr(FloatColor color, float gamma = 2.2f, float exposure = 1.0f)
+        {
+            var r = MathF.Pow(1 - MathF.Exp(-color.R * exposure), 1.0f / gamma);
+            var g = MathF.Pow(1 - MathF.Exp(-color.G * exposure), 1.0f / gamma);
+            var b = MathF.Pow(1 - MathF.Exp(-color.B * exposure), 1.0f / gamma);
+            return new FloatColor(r, g, b);
+        }
     }
 }

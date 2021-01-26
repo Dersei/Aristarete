@@ -1,5 +1,6 @@
 ﻿using Aristarete.Basic;
 using Aristarete.Meshes;
+using Aristarete.Rendering;
 
 namespace Aristarete.Lighting
 {
@@ -10,8 +11,28 @@ namespace Aristarete.Lighting
         public FloatColor Diffuse;
         public FloatColor Specular;
         public float Shininess;
+        public Scene? Scene;
 
-        public abstract FloatColor Calculate(Vertex vertex, IRenderable renderable);
+        public ShadowMap? ShadowMap;
 
+        public virtual Light CreateShadowMap()
+        {
+            if (this is DirectionalLight or SpotLight)
+                ShadowMap = new ShadowMap(this, Scene!);
+            // if (this is PointLight)
+            //     ShadowMap = new PointShadowMap(this, Scene);
+            return this;
+        }
+
+        public virtual Light UpdateShadowMap()
+        {
+            ShadowMap?.Update();
+            ShadowMap?.Render();
+            return this;
+        }
+
+        public abstract FloatColor Calculate(Vertex vertex, Mesh renderable, Rasterizer rasterizer);
+
+        public abstract FloatColor Calculate(DeferredData data, Rasterizer rasterizer);
     }
 }

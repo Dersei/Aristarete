@@ -4,13 +4,12 @@ namespace Aristarete.Meshes
 {
     public class Plane : Mesh
     {
-        public Plane(VertexProcessor vertexProcessor) : base(vertexProcessor)
+        public Plane()
         {
             Create();
         }
 
-        public Plane(VertexProcessor vertexProcessor, float length = 1, float width = 1, int resX = 2, int resZ = 2) :
-            base(vertexProcessor)
+        public Plane(float length = 1, float width = 1, int resX = 2, int resZ = 2)
         {
             Create(length, width, resX, resZ);
         }
@@ -36,7 +35,7 @@ namespace Aristarete.Meshes
             for (var face = 0; face < nbFaces; face++)
             {
                 // Retrieve lower left corner from face ind
-                var i = face % (resX - 1) + (face / (resZ - 1) * resX);
+                var i = face % (resX - 1) + face / (resZ - 1) * resX;
 
                 triangles[t++] = i + resX;
                 triangles[t++] = i + 1;
@@ -46,6 +45,15 @@ namespace Aristarete.Meshes
                 triangles[t++] = i + resX + 1;
                 triangles[t++] = i + 1;
             }
+            
+            Float2[] uvs = new Float2[ vertices.Length ];
+            for(int v = 0; v < resZ; v++)
+            {
+                for(int u = 0; u < resX; u++)
+                {
+                    uvs[ u + v * resX ] = new Float2( (float)u / (resX - 1), (float)v / (resZ - 1) );
+                }
+            }
 
             var size = triangles.Length / 3;
             Int3[] indices = new Int3[size];
@@ -54,13 +62,15 @@ namespace Aristarete.Meshes
                 indices[j] = new Int3(triangles[j * 3], triangles[j * 3 + 1], triangles[j * 3 + 2]);
             }
 
-            for (int i = 0; i < vertices.Length; i++)
+            for (var i = 0; i < vertices.Length; i++)
             {
-                // vertices[i].Normal = vertices[1]
+                vertices[i].Normal = Float3.Up;
+                vertices[i].UV = uvs[i];
             }
 
             Vertices = vertices;
             Indices = indices;
+            CreateTriangles();
         }
     }
 }
