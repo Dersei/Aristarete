@@ -4,6 +4,7 @@ using Aristarete.Basic;
 using Aristarete.Basic.Materials;
 using Aristarete.Basic.Textures;
 using Aristarete.Rendering;
+using Daeira;
 
 namespace Aristarete.Meshes
 {

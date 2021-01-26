@@ -6,6 +6,7 @@ using System.Linq;
 using Aristarete.Basic;
 using Aristarete.Basic.Materials;
 using Aristarete.Utils;
+using Daeira;
 
 namespace Aristarete.Meshes.Models
 {

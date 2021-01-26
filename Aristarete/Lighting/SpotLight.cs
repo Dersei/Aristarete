@@ -1,9 +1,9 @@
 ﻿using System;
-using Aristarete.Basic;
 using Aristarete.Meshes;
 using Aristarete.Rendering;
+using Daeira;
 using static Aristarete.Extensions.MathExtensions;
-using static Aristarete.Basic.Float3;
+using static Daeira.Float3;
 
 namespace Aristarete.Lighting
 {
@@ -49,7 +49,7 @@ namespace Aristarete.Lighting
             var v = vertex.Position;
             var l = (Position - v).NormalizeUnsafe();
 
-            v = v.NormalizeUnsafe();
+            //v = v.NormalizeUnsafe();
             var r = l.Reflect(n).NormalizeUnsafe();
             var diff = Saturate(l.Dot(n));
             var spec = MathF.Pow(Saturate(Dot((rasterizer.Camera.Position - vertex.Position).NormalizeUnsafe(), -r)),
@@ -71,7 +71,7 @@ namespace Aristarete.Lighting
             var v = data.Position;
             var l = (Position - v).NormalizeUnsafe();
 
-            v = v.NormalizeUnsafe();
+            //v = v.NormalizeUnsafe();
             var r = l.Reflect(n).NormalizeUnsafe();
             var diff = Saturate(l.Dot(n));
             var spec = MathF.Pow(MathF.Max(Dot((rasterizer.Camera.Position - data.Position).NormalizeUnsafe(), -r), 0),

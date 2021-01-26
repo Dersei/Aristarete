@@ -4,6 +4,7 @@ using Aristarete.Inputting;
 using Aristarete.Lighting;
 using Aristarete.Meshes;
 using Aristarete.Rendering;
+using Daeira;
 
 namespace Aristarete.Scenes
 {

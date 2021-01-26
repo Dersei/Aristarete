@@ -2,6 +2,8 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Aristarete.Basic;
+using Daeira;
+using Quaternion = System.Numerics.Quaternion;
 
 namespace Aristarete.Extensions
 {

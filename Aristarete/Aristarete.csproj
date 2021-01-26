@@ -230,4 +230,10 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="Daeira, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+        <HintPath>..\..\Daeira\Daeira\bin\Release\net5.0\Daeira.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

@@ -9,6 +9,7 @@ using Aristarete.Meshes;
 using Aristarete.Meshes.Models;
 using Aristarete.Rendering;
 using Aristarete.Utils;
+using Daeira;
 
 namespace Aristarete.Scenes
 {

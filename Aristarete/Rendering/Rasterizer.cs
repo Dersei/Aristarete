@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Aristarete.Basic;
 using Aristarete.Cameras;
 using Aristarete.Meshes;
+using Daeira;
 
 namespace Aristarete.Rendering
 {

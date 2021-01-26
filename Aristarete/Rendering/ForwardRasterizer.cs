@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Aristarete.Basic;
 using Aristarete.Cameras;
 using Aristarete.Meshes;
+using Daeira;
 
 namespace Aristarete.Rendering
 {

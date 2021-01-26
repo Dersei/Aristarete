@@ -1,5 +1,6 @@
 ﻿using Aristarete.Basic;
 using Aristarete.Rendering;
+using Daeira;
 
 namespace Aristarete.Meshes.Models
 {

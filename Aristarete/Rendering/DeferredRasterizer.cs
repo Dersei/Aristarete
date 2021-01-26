@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Aristarete.Basic;
 using Aristarete.Cameras;
 using Aristarete.Meshes;
+using Daeira;
 
 namespace Aristarete.Rendering
 {
@@ -151,7 +152,7 @@ namespace Aristarete.Rendering
                                     ShadowFactor(deferredData.Position);
                                 break;
                             case BufferMode.Normal:
-                                Buffer[x, y] = deferredData.Normal.ToFloatColor();
+                                Buffer[x, y] = new FloatColor(deferredData.Normal);
                                 break;
                             case BufferMode.Color:
                                 Buffer[x, y] = deferredData.Color;

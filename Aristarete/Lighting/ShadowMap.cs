@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Aristarete.Basic;
 using Aristarete.Cameras;
 using Aristarete.Rendering;
+using Daeira;
 using Buffer = Aristarete.Rendering.Buffer;
 
 namespace Aristarete.Lighting

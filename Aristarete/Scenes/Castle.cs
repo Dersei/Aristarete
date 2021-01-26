@@ -8,6 +8,7 @@ using Aristarete.Lighting;
 using Aristarete.Meshes;
 using Aristarete.Meshes.Models;
 using Aristarete.Rendering;
+using Daeira;
 using Buffer = Aristarete.Rendering.Buffer;
 
 namespace Aristarete.Scenes

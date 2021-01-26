@@ -1,5 +1,6 @@
 ﻿using System;
 using Aristarete.Basic;
+using Daeira;
 
 namespace Aristarete.Meshes
 {
@@ -173,8 +174,8 @@ namespace Aristarete.Meshes
             tangents[vertices.Length - 1] = tangents[3] = new Float4(new Float3(-1f, 0f, 1f).Normalize(), 0);
             for (int i = 0; i < 4; i++)
             {
-                tangents[vertices.Length - 1 - i] = new Float4(tangents[vertices.Length - 1 - i].XYZ, -1);
-                tangents[i] = new Float4(tangents[i].XYZ, -1);
+                tangents[vertices.Length - 1 - i] = new Float4(tangents[vertices.Length - 1 - i].XYZ(), -1);
+                tangents[i] = new Float4(tangents[i].XYZ(), -1);
             }
         }
 
