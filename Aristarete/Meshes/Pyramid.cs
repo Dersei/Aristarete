@@ -1,6 +1,6 @@
 ﻿using System;
 using Aristarete.Basic;
-using Daeira;
+
 
 namespace Aristarete.Meshes
 {
@@ -27,25 +27,25 @@ namespace Aristarete.Meshes
             #region Vertices
 
 // bottom + top + sides
-            Float3[] vertices = new Float3[verticesCap + verticesCap + sides * heightSeg * 2 + 2];
+            Float3Sse[] vertices = new Float3Sse[verticesCap + verticesCap + sides * heightSeg * 2 + 2];
             var vert = 0;
             const float _2pi = MathF.PI * 2f;
 
 // Bottom cap
-            vertices[vert++] = new Float3(0f, 0f, 0f);
+            vertices[vert++] = new Float3Sse(0f, 0f, 0f);
             while (vert <= sides)
             {
                 var rad = (float) vert / sides * _2pi;
-                vertices[vert] = new Float3(MathF.Cos(rad) * bottomRadius, 0f, MathF.Sin(rad) * bottomRadius);
+                vertices[vert] = new Float3Sse(MathF.Cos(rad) * bottomRadius, 0f, MathF.Sin(rad) * bottomRadius);
                 vert++;
             }
 
 // Top cap
-            vertices[vert++] = new Float3(0f, height, 0f);
+            vertices[vert++] = new Float3Sse(0f, height, 0f);
             while (vert <= sides * 2 + 1)
             {
                 var rad = (float) (vert - sides - 1) / sides * _2pi;
-                vertices[vert] = new Float3(MathF.Cos(rad) * topRadius, height, MathF.Sin(rad) * topRadius);
+                vertices[vert] = new Float3Sse(MathF.Cos(rad) * topRadius, height, MathF.Sin(rad) * topRadius);
                 vert++;
             }
 
@@ -54,8 +54,8 @@ namespace Aristarete.Meshes
             while (vert <= vertices.Length - 4)
             {
                 var rad = (float) v / sides * _2pi;
-                vertices[vert] = new Float3(MathF.Cos(rad) * topRadius, height, MathF.Sin(rad) * topRadius);
-                vertices[vert + 1] = new Float3(MathF.Cos(rad) * bottomRadius, 0, MathF.Sin(rad) * bottomRadius);
+                vertices[vert] = new Float3Sse(MathF.Cos(rad) * topRadius, height, MathF.Sin(rad) * topRadius);
+                vertices[vert + 1] = new Float3Sse(MathF.Cos(rad) * bottomRadius, 0, MathF.Sin(rad) * bottomRadius);
                 vert += 2;
                 v++;
             }
@@ -68,19 +68,19 @@ namespace Aristarete.Meshes
             #region Normales
 
 // bottom + top + sides
-            Float3[] normales = new Float3[vertices.Length];
+            Float3Sse[] normales = new Float3Sse[vertices.Length];
             vert = 0;
 
 // Bottom cap
             while (vert <= sides)
             {
-                normales[vert++] = Float3.Down;
+                normales[vert++] = Float3Sse.Down;
             }
 
 // Top cap
             while (vert <= sides * 2 + 1)
             {
-                normales[vert++] = Float3.Up;
+                normales[vert++] = Float3Sse.Up;
             }
 
 // Sides
@@ -91,7 +91,7 @@ namespace Aristarete.Meshes
                 var cos = MathF.Cos(rad);
                 var sin = MathF.Sin(rad);
 
-                normales[vert] = new Float3(cos, 0f, sin);
+                normales[vert] = new Float3Sse(cos, 0f, sin);
                 normales[vert + 1] = normales[vert];
 
                 vert += 2;

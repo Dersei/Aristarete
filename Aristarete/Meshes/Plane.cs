@@ -1,5 +1,5 @@
 ﻿using Aristarete.Basic;
-using Daeira;
+
 
 namespace Aristarete.Meshes
 {
@@ -65,7 +65,7 @@ namespace Aristarete.Meshes
 
             for (var i = 0; i < vertices.Length; i++)
             {
-                vertices[i].Normal = Float3.Up;
+                vertices[i].Normal = Float3Sse.Up;
                 vertices[i].UV = uvs[i];
             }
 

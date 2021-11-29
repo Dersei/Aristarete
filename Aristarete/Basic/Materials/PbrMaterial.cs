@@ -1,5 +1,4 @@
 ﻿using Aristarete.Basic.Textures;
-using Daeira;
 
 namespace Aristarete.Basic.Materials
 {
@@ -65,11 +64,11 @@ namespace Aristarete.Basic.Materials
             return FloatColor.White;
         }
         
-        public Float3 GetNormals(Float2 uv)
+        public Float3Sse GetNormals(Float2 uv)
         {
             var texelColor = NormalMap?.GetColor(uv);
-            if (texelColor != null) return new Float3(texelColor.Value.R * 2 - 1, texelColor.Value.G * 2 - 1, texelColor.Value.B * 2 - 1);
-            return Float3.Zero;
+            if (texelColor != null) return new Float3Sse(texelColor.Value.R * 2 - 1, texelColor.Value.G * 2 - 1, texelColor.Value.B * 2 - 1);
+            return Float3Sse.Zero;
         }
     }
 }

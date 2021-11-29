@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using Aristarete.Basic;
 using Aristarete.Cameras;
 using Aristarete.Meshes;
-using Daeira;
+
 
 namespace Aristarete.Rendering
 {
@@ -42,7 +42,7 @@ namespace Aristarete.Rendering
             }
         }
         
-        protected FloatColor ShadowFactor(Float3 pointWorld)
+        protected FloatColor ShadowFactor(Float3Sse pointWorld)
         {
             var shadow = 0.0f; // No shadow     
 
@@ -58,7 +58,7 @@ namespace Aristarete.Rendering
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected Float3 ToBufferCoords(Float3 originalCoord)
+        protected Float3Sse ToBufferCoords(Float3Sse originalCoord)
         {
             return new((int) ((originalCoord.X + 1.0f) * Width * 0.5f),
                 (int) ((-originalCoord.Y + 1.0f) * Height * 0.5f), originalCoord.Z);
@@ -67,7 +67,7 @@ namespace Aristarete.Rendering
         protected bool IsOutsideFrustum(float depth) => depth < Camera.Near || depth > Camera.Far;
 
 
-        public abstract void Triangle(in Triangle triangle, Float3[] screenCords, Float3[] worldCoords, Mesh mesh, LightingMode lightingMode,
+        public abstract void Triangle(in Triangle triangle, Float3Sse[] screenCords, Float3Sse[] worldCoords, Mesh mesh, LightingMode lightingMode,
             RenderMode renderMode = RenderMode.Color);
 
         public abstract void Render(RenderMode renderMode = RenderMode.Color);
@@ -95,7 +95,7 @@ namespace Aristarete.Rendering
             return pointNdc;
         }
 
-        protected Float3 Unrasterize(Float2 pointRaster, float depthFromCamera)
+        protected Float3Sse Unrasterize(Float2 pointRaster, float depthFromCamera)
         {
             var pointNdc = ViewportTransformInv(pointRaster);
             var pointCamera = Camera.ProjectTransformInv(pointNdc, depthFromCamera);
@@ -103,7 +103,7 @@ namespace Aristarete.Rendering
             return pointWorld;
         }
 
-        public Float3 Rasterize(Float3 pointWorld)
+        public Float3Sse Rasterize(Float3Sse pointWorld)
         {
             var pointCamera = Camera.ViewTransform(pointWorld);
             var pointNdc = Camera.ProjectTransform(pointCamera);
@@ -299,7 +299,7 @@ namespace Aristarete.Rendering
             public readonly bool SecondEdge;
             public readonly bool ThirdEdge;
 
-            public BarycentricHelper(in Float3 v1, in Float3 v2, in Float3 v3)
+            public BarycentricHelper(in Float3Sse v1, in Float3Sse v2, in Float3Sse v3)
             {
                 Dx12 = v1.X - v2.X;
                 Dx13 = v1.X - v3.X;
@@ -323,13 +323,13 @@ namespace Aristarete.Rendering
                 // ThirdEdge = Dy31 < 0 || Dx31 < 0;
             }
 
-            public Float3 Calculate(float x, float y)
+            public Float3Sse Calculate(float x, float y)
             {
                 var a = (Dy23 * (x - V3X) + Dx32 * (y - V3Y)) * MultiplierA;
                 var b = (Dy31 * (x - V3X) + Dx13 * (y - V3Y)) * MultiplierB;
                 var c = 1 - a - b;
 
-                return new Float3(a, b, c);
+                return new Float3Sse(a, b, c);
             }
         }
 

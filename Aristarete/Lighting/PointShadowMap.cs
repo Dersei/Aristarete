@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 using Aristarete.Basic;
 using Aristarete.Cameras;
 using Aristarete.Rendering;
-using Daeira;
 using Buffer = Aristarete.Rendering.Buffer;
+
 
 namespace Aristarete.Lighting
 {
@@ -41,29 +41,29 @@ namespace Aristarete.Lighting
             _light = light;
             _scene = scene;
             _rasterizerUp = new ForwardRasterizer(new Buffer(ShadowMapWidth, ShadowMapHeight), scene,
-                new OrthographicCamera(light.Position, (light.Position + Float3.Up).Normalize(), Float3.Forward, -10f, 10f, -10f, 10f, -10f, 20f));
+                new OrthographicCamera(light.Position, (light.Position + Float3Sse.Up).NormalizeExact(), Float3Sse.Forward, -10f, 10f, -10f, 10f, -10f, 20f));
             _rasterizerDown = new ForwardRasterizer(new Buffer(ShadowMapWidth, ShadowMapHeight), scene,
-                new OrthographicCamera(light.Position, (light.Position + Float3.Down).Normalize(), Float3.Back, -10f, 10f, -10f, 10f, -10f, 20f));
+                new OrthographicCamera(light.Position, (light.Position + Float3Sse.Down).NormalizeExact(), Float3Sse.Back, -10f, 10f, -10f, 10f, -10f, 20f));
             _rasterizerForward = new ForwardRasterizer(new Buffer(ShadowMapWidth, ShadowMapHeight), scene,
-                new OrthographicCamera(light.Position, (light.Position + Float3.Forward).Normalize(), Float3.Down, -10f, 10f, -10f, 10f, -10f, 20f));
+                new OrthographicCamera(light.Position, (light.Position + Float3Sse.Forward).NormalizeExact(), Float3Sse.Down, -10f, 10f, -10f, 10f, -10f, 20f));
             _rasterizerBack = new ForwardRasterizer(new Buffer(ShadowMapWidth, ShadowMapHeight), scene,
-                new OrthographicCamera(light.Position, (light.Position + Float3.Back).Normalize(), Float3.Down, -10f, 10f, -10f, 10f, -10f, 20f));
+                new OrthographicCamera(light.Position, (light.Position + Float3Sse.Back).NormalizeExact(), Float3Sse.Down, -10f, 10f, -10f, 10f, -10f, 20f));
             _rasterizerLeft = new ForwardRasterizer(new Buffer(ShadowMapWidth, ShadowMapHeight), scene,
-                new OrthographicCamera(light.Position, (light.Position + Float3.Left).Normalize(), Float3.Down, -10f, 10f, -10f, 10f, -10f, 20f));
+                new OrthographicCamera(light.Position, (light.Position + Float3Sse.Left).NormalizeExact(), Float3Sse.Down, -10f, 10f, -10f, 10f, -10f, 20f));
             _rasterizerRight = new ForwardRasterizer(new Buffer(ShadowMapWidth, ShadowMapHeight), scene,
-                new OrthographicCamera(light.Position, (light.Position + Float3.Right).Normalize(), Float3.Down, -10f, 10f, -10f, 10f, -10f, 20f));
+                new OrthographicCamera(light.Position, (light.Position + Float3Sse.Right).NormalizeExact(), Float3Sse.Down, -10f, 10f, -10f, 10f, -10f, 20f));
             // _rasterizerUp = new ForwardRasterizer(new Buffer(ShadowMapWidth, ShadowMapHeight), scene,
-            //     new PerspectiveCamera(light.Position, (light.Position + Float3.Up).Normalize(), Float3.Back, 90, 1, 0.1f, 50));
+            //     new PerspectiveCamera(light.Position, (light.Position + Float3Sse.Up).Normalize(), Float3Sse.Back, 90, 1, 0.1f, 50));
             // _rasterizerDown = new ForwardRasterizer(new Buffer(ShadowMapWidth, ShadowMapHeight), scene,
-            //     new PerspectiveCamera(light.Position, (light.Position + Float3.Down).Normalize(), Float3.Forward, 90, 1, 0.1f, 50));
+            //     new PerspectiveCamera(light.Position, (light.Position + Float3Sse.Down).Normalize(), Float3Sse.Forward, 90, 1, 0.1f, 50));
             // _rasterizerForward = new ForwardRasterizer(new Buffer(ShadowMapWidth, ShadowMapHeight), scene,
-            //     new PerspectiveCamera(light.Position, (light.Position + Float3.Forward).Normalize(), Float3.Up, 90, 1, 0.1f, 50));
+            //     new PerspectiveCamera(light.Position, (light.Position + Float3Sse.Forward).Normalize(), Float3Sse.Up, 90, 1, 0.1f, 50));
             // _rasterizerBack = new ForwardRasterizer(new Buffer(ShadowMapWidth, ShadowMapHeight), scene,
-            //     new PerspectiveCamera(light.Position, (light.Position + Float3.Back).Normalize(), Float3.Up, 90, 1, 0.1f, 50));
+            //     new PerspectiveCamera(light.Position, (light.Position + Float3Sse.Back).Normalize(), Float3Sse.Up, 90, 1, 0.1f, 50));
             // _rasterizerLeft = new ForwardRasterizer(new Buffer(ShadowMapWidth, ShadowMapHeight), scene,
-            //     new PerspectiveCamera(light.Position, (light.Position + Float3.Left).Normalize(), Float3.Up, 90, 1, 0.1f, 50));
+            //     new PerspectiveCamera(light.Position, (light.Position + Float3Sse.Left).Normalize(), Float3Sse.Up, 90, 1, 0.1f, 50));
             // _rasterizerRight = new ForwardRasterizer(new Buffer(ShadowMapWidth, ShadowMapHeight), scene,
-            //     new PerspectiveCamera(light.Position, (light.Position + Float3.Right).Normalize(), Float3.Up, 90, 1, 0.1f, 50));
+            //     new PerspectiveCamera(light.Position, (light.Position + Float3Sse.Right).Normalize(), Float3Sse.Up, 90, 1, 0.1f, 50));
         }
 
         public void Update()
@@ -97,15 +97,15 @@ namespace Aristarete.Lighting
         }
 
 
-        private (float[] map, Rasterizer rasterizer) MapChooser(Float3 point)
+        private (float[] map, Rasterizer rasterizer) MapChooser(Float3Sse point)
         {
             List<(float, float[], Rasterizer)> list = new List<(float, float[], Rasterizer)>();
-            list.Add((Float3.Dot(point, _rasterizerBack.Camera.Direction), _mapBack, _rasterizerBack));
-            list.Add((Float3.Dot(point, _rasterizerDown.Camera.Direction), _mapDown, _rasterizerDown));
-            list.Add((Float3.Dot(point, _rasterizerUp.Camera.Direction), _mapUp, _rasterizerUp));
-            list.Add((Float3.Dot(point, _rasterizerForward.Camera.Direction), _mapForward, _rasterizerForward));
-            list.Add((Float3.Dot(point, _rasterizerLeft.Camera.Direction), _mapLeft, _rasterizerLeft));
-            list.Add((Float3.Dot(point, _rasterizerRight.Camera.Direction), _mapRight, _rasterizerRight));
+            list.Add((Float3Sse.Dot(point, _rasterizerBack.Camera.Direction), _mapBack, _rasterizerBack));
+            list.Add((Float3Sse.Dot(point, _rasterizerDown.Camera.Direction), _mapDown, _rasterizerDown));
+            list.Add((Float3Sse.Dot(point, _rasterizerUp.Camera.Direction), _mapUp, _rasterizerUp));
+            list.Add((Float3Sse.Dot(point, _rasterizerForward.Camera.Direction), _mapForward, _rasterizerForward));
+            list.Add((Float3Sse.Dot(point, _rasterizerLeft.Camera.Direction), _mapLeft, _rasterizerLeft));
+            list.Add((Float3Sse.Dot(point, _rasterizerRight.Camera.Direction), _mapRight, _rasterizerRight));
             list = list.OrderBy(item => item.Item1).ToList();
             return (list[0].Item2, list[0].Item3);
             // var ax = MathF.Abs(point.X);
@@ -133,7 +133,7 @@ namespace Aristarete.Lighting
             // return (_mapForward, _rasterizerForward);
         }
 
-        public float PointInShadow(Float3 pointWorld)
+        public float PointInShadow(Float3Sse pointWorld)
         {
             var direction = _light.Position - pointWorld;
             //var point_light_space = _rasterizer.Rasterize(pointWorld);

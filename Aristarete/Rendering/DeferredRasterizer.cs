@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Aristarete.Basic;
 using Aristarete.Cameras;
 using Aristarete.Meshes;
-using Daeira;
+
 
 namespace Aristarete.Rendering
 {
@@ -13,23 +13,26 @@ namespace Aristarete.Rendering
         private readonly FloatColor[] _colorBuffer;
         private readonly FloatColor[] _specularBuffer;
         private readonly FloatColor[] _emissionBuffer;
-        private readonly Float3[] _normalBuffer;
-        private readonly Float3[] _worldPositionBuffer;
+        private readonly Float3Sse[] _normalBuffer;
+        private readonly Float3Sse[] _worldPositionBuffer;
 
-        public DeferredRasterizer(Buffer buffer, Scene scene,Camera camera) : base(buffer,scene,camera)
+        private readonly int Size;
+
+        public DeferredRasterizer(Buffer buffer, Scene scene, Camera camera) : base(buffer, scene, camera)
         {
+            Size = Width * Height;
             _diffuseBuffer = new FloatColor[Width * Height];
             _colorBuffer = new FloatColor[Width * Height];
             _specularBuffer = new FloatColor[Width * Height];
             _emissionBuffer = new FloatColor[Width * Height];
-            _normalBuffer = new Float3[Width * Height];
-            _worldPositionBuffer = new Float3[Width * Height];
+            _normalBuffer = new Float3Sse[Width * Height];
+            _worldPositionBuffer = new Float3Sse[Width * Height];
             Array.Fill(_diffuseBuffer, FloatColor.Black);
             Array.Fill(_colorBuffer, FloatColor.Black);
             Array.Fill(_specularBuffer, FloatColor.Black);
             Array.Fill(_emissionBuffer, FloatColor.Black);
-            Array.Fill(_normalBuffer, Float3.One);
-            Array.Fill(_worldPositionBuffer, Float3.Zero);
+            Array.Fill(_normalBuffer, Float3Sse.One);
+            Array.Fill(_worldPositionBuffer, Float3Sse.Zero);
         }
 
         public override void Render(RenderMode renderMode = RenderMode.Color)
@@ -39,11 +42,12 @@ namespace Aristarete.Rendering
                 mesh.Update(this);
                 for (int k = 0; k < mesh.Triangles.Count; k++)
                 {
-                    Triangle(mesh.Triangles[k], mesh.ScreenCoords[k], mesh.WorldCoords[k], mesh, mesh.LightingMode, renderMode);
+                    Triangle(mesh.Triangles[k], mesh.ScreenCoords[k], mesh.WorldCoords[k], mesh, mesh.LightingMode,
+                        renderMode);
                 }
             });
-            
-            RenderToScreen();
+
+            RenderToScreen(BufferMode.Standard);
         }
 
         private FloatColor CalculateLight(in DeferredData deferredData)
@@ -57,11 +61,11 @@ namespace Aristarete.Rendering
             return colorLight;
         }
 
-        public override void Triangle(in Triangle triangle, Float3[] screenCords, Float3[] worldCoords, Mesh mesh,
+        public override void Triangle(in Triangle triangle, Float3Sse[] screenCords, Float3Sse[] worldCoords, Mesh mesh,
             LightingMode lightingMode,
             RenderMode renderMode = RenderMode.Color)
         {
-            Float3[] bufferCoords = new Float3[3];
+            Float3Sse[] bufferCoords = new Float3Sse[3];
             bufferCoords[0] = ToBufferCoords(screenCords[0]);
             bufferCoords[1] = ToBufferCoords(screenCords[1]);
             bufferCoords[2] = ToBufferCoords(screenCords[2]);
@@ -72,8 +76,8 @@ namespace Aristarete.Rendering
 
             for (var i = 0; i < 3; i++)
             {
-                bBoxMin = Float2.MinAbsolute(bBoxMin, bufferCoords[i].XY);
-                bBoxMax = Float2.MaxClamped(bBoxMax, bufferCoords[i].XY, clamp);
+                bBoxMin = Float2.MinAbsolute(bBoxMin, bufferCoords[i].XY());
+                bBoxMax = Float2.MaxClamped(bBoxMax, bufferCoords[i].XY(), clamp);
             }
 
             var barycentricHelper = new BarycentricHelper(bufferCoords[0], bufferCoords[1], bufferCoords[2]);
@@ -113,8 +117,8 @@ namespace Aristarete.Rendering
                                          triangle.Third.Normal * barycentric.Z;
                             var index = (int) (x + y * Width);
                             var n = mesh.TransformNormals(normal)
-                                .NormalizeUnsafe() + mesh.Material.GetNormals(uv);
-                            n = n.NormalizeUnsafe();
+                                .NormalizeExact() + mesh.Material.GetNormals(uv);
+                            n = n.NormalizeExact();
                             _normalBuffer[index] = n;
                             _colorBuffer[index] = mesh.Material.Color;
                             _diffuseBuffer[index] = mesh.Material.GetDiffuse(uv);
@@ -131,51 +135,139 @@ namespace Aristarete.Rendering
 
         private void RenderToScreen(BufferMode bufferMode = BufferMode.Standard)
         {
-            for (var x = 0; x < Width; ++x)
+            Parallel.For(0, Size, i =>
             {
-                for (var y = 0; y < Height; ++y)
+                var column = i % Width;
+                var row = (i - column) / Width;
+                var depth = ZBuffer[i];
+                if (depth < Camera.Far && depth > Camera.Near)
                 {
-                    var i = y * Width + x;
-                    var depth = ZBuffer[i];
-                    if (depth < Camera.Far)
-                    {
-                        var deferredData = new DeferredData(_worldPositionBuffer[i], _normalBuffer[i], _colorBuffer[i],
-                            _diffuseBuffer[i], _specularBuffer[i], _emissionBuffer[i]);
+                    var deferredData = new DeferredData(_worldPositionBuffer[i], _normalBuffer[i], _colorBuffer[i],
+                        _diffuseBuffer[i], _specularBuffer[i], _emissionBuffer[i]);
 
-                        switch (bufferMode)
-                        {
-                            case BufferMode.Standard:
-                                Buffer[x, y] = 
-                                    CalculateLight(deferredData) * deferredData.Diffuse *
-                                    deferredData.Color + deferredData.Emission 
-                                    - 
-                                    ShadowFactor(deferredData.Position);
-                                break;
-                            case BufferMode.Normal:
-                                Buffer[x, y] = new FloatColor(deferredData.Normal);
-                                break;
-                            case BufferMode.Color:
-                                Buffer[x, y] = deferredData.Color;
-                                break;
-                            case BufferMode.Diffuse:
-                                Buffer[x, y] = deferredData.Diffuse;
-                                break;
-                            case BufferMode.Specular:
-                                Buffer[x, y] = deferredData.Specular;
-                                break;
-                            case BufferMode.Emission:
-                                Buffer[x, y] = deferredData.Emission;
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(bufferMode), bufferMode, null);
-                        }
-                    }
-                    else
+                    switch (bufferMode)
                     {
-                        Buffer[x, y] = FloatColor.Black;
+                        case BufferMode.Standard:
+                            Buffer[column, row] =
+                                CalculateLight(deferredData) * deferredData.Diffuse *
+                                deferredData.Color + deferredData.Emission
+                                -
+                                ShadowFactor(deferredData.Position);
+                            break;
+                        case BufferMode.Normal:
+                            Buffer[column, row] = new FloatColor(deferredData.Normal);
+                            break;
+                        case BufferMode.Color:
+                            Buffer[column, row] = deferredData.Color;
+                            break;
+                        case BufferMode.Diffuse:
+                            Buffer[column, row] = deferredData.Diffuse;
+                            break;
+                        case BufferMode.Specular:
+                            Buffer[column, row] = deferredData.Specular;
+                            break;
+                        case BufferMode.Emission:
+                            Buffer[column, row] = deferredData.Emission;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(bufferMode), bufferMode, null);
                     }
                 }
-            }
+                else
+                {
+                    Buffer[column, row] = FloatColor.Black;
+                }
+            });
+            // Parallel.For(0, Width, x =>
+            // {
+            //     for (var y = 0; y < Height; ++y)
+            //     {
+            //         var i = y * Width + x;
+            //         var depth = ZBuffer[i];
+            //         if (depth < Camera.Far && depth > Camera.Near)
+            //         {
+            //             var deferredData = new DeferredData(_worldPositionBuffer[i], _normalBuffer[i], _colorBuffer[i],
+            //                 _diffuseBuffer[i], _specularBuffer[i], _emissionBuffer[i]);
+            //
+            //             switch (bufferMode)
+            //             {
+            //                 case BufferMode.Standard:
+            //                     Buffer[x, y] =
+            //                         CalculateLight(deferredData) * deferredData.Diffuse *
+            //                         deferredData.Color + deferredData.Emission
+            //                         -
+            //                         ShadowFactor(deferredData.Position);
+            //                     break;
+            //                 case BufferMode.Normal:
+            //                     Buffer[x, y] = new FloatColor(deferredData.Normal);
+            //                     break;
+            //                 case BufferMode.Color:
+            //                     Buffer[x, y] = deferredData.Color;
+            //                     break;
+            //                 case BufferMode.Diffuse:
+            //                     Buffer[x, y] = deferredData.Diffuse;
+            //                     break;
+            //                 case BufferMode.Specular:
+            //                     Buffer[x, y] = deferredData.Specular;
+            //                     break;
+            //                 case BufferMode.Emission:
+            //                     Buffer[x, y] = deferredData.Emission;
+            //                     break;
+            //                 default:
+            //                     throw new ArgumentOutOfRangeException(nameof(bufferMode), bufferMode, null);
+            //             }
+            //         }
+            //         else
+            //         {
+            //             Buffer[x, y] = FloatColor.Black;
+            //         }
+            //     }
+            // });
+            // for (var x = 0; x < Width; ++x)
+            // {
+            //     for (var y = 0; y < Height; ++y)
+            //     {
+            //         var i = y * Width + x;
+            //         var depth = ZBuffer[i];
+            //         if (depth < Camera.Far && depth > Camera.Near)
+            //         {
+            //             var deferredData = new DeferredData(_worldPositionBuffer[i], _normalBuffer[i], _colorBuffer[i],
+            //                 _diffuseBuffer[i], _specularBuffer[i], _emissionBuffer[i]);
+            //
+            //             switch (bufferMode)
+            //             {
+            //                 case BufferMode.Standard:
+            //                     Buffer[x, y] = 
+            //                         CalculateLight(deferredData) * deferredData.Diffuse *
+            //                         deferredData.Color + deferredData.Emission 
+            //                         - 
+            //                         ShadowFactor(deferredData.Position);
+            //                     break;
+            //                 case BufferMode.Normal:
+            //                     Buffer[x, y] = new FloatColor(deferredData.Normal);
+            //                     break;
+            //                 case BufferMode.Color:
+            //                     Buffer[x, y] = deferredData.Color;
+            //                     break;
+            //                 case BufferMode.Diffuse:
+            //                     Buffer[x, y] = deferredData.Diffuse;
+            //                     break;
+            //                 case BufferMode.Specular:
+            //                     Buffer[x, y] = deferredData.Specular;
+            //                     break;
+            //                 case BufferMode.Emission:
+            //                     Buffer[x, y] = deferredData.Emission;
+            //                     break;
+            //                 default:
+            //                     throw new ArgumentOutOfRangeException(nameof(bufferMode), bufferMode, null);
+            //             }
+            //         }
+            //         else
+            //         {
+            //             Buffer[x, y] = FloatColor.Black;
+            //         }
+            //     }
+            // }
         }
 
         public enum BufferMode

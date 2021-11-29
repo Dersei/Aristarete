@@ -1,6 +1,6 @@
 ﻿using System;
 using Aristarete.Basic;
-using Daeira;
+
 
 namespace Aristarete.Meshes
 {
@@ -176,19 +176,19 @@ namespace Aristarete.Meshes
             }
             
             // bottom + top + sides
-            Float3[] normales = new Float3[vertices.Length];
+            Float3Sse[] normales = new Float3Sse[vertices.Length];
             vert = 0;
  
 // Bottom cap
             while( vert < verticesCap )
             {
-                normales[vert++] = Float3.Down;
+                normales[vert++] = Float3Sse.Down;
             }
  
 // Top cap
             while( vert < verticesCap * 2 )
             {
-                normales[vert++] = Float3.Up;
+                normales[vert++] = Float3Sse.Up;
             }
  
 // Sides (out)
@@ -199,7 +199,7 @@ namespace Aristarete.Meshes
  
                 float r1 = (float)sideCounter++ / sides * _2pi;
  
-                normales[vert] = new Float3(MathF.Cos(r1), 0f, MathF.Sin(r1));
+                normales[vert] = new Float3Sse(MathF.Cos(r1), 0f, MathF.Sin(r1));
                 normales[vert+1] = normales[vert];
                 vert+=2;
             }
@@ -212,7 +212,7 @@ namespace Aristarete.Meshes
  
                 float r1 = (float)sideCounter++ / sides * _2pi;
  
-                normales[vert] = -new Float3(MathF.Cos(r1), 0f, MathF.Sin(r1));
+                normales[vert] = -new Float3Sse(MathF.Cos(r1), 0f, MathF.Sin(r1));
                 normales[vert+1] = normales[vert];
                 vert+=2;
             }

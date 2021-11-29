@@ -1,5 +1,6 @@
 ﻿using Aristarete.Basic;
-using Daeira;
+
+using Matrix = Aristarete.Basic.Matrix;
 
 namespace Aristarete.Cameras
 {
@@ -10,13 +11,13 @@ namespace Aristarete.Cameras
         public Matrix View2ProjInv = Matrix.Identity;
         public Matrix LookAt;
         public Matrix LookAtInv;
-        public Float3 Position;
-        public Float3 Direction;
-        public Float3 Up;
+        public Float3Sse Position;
+        public Float3Sse Direction;
+        public Float3Sse Up;
         public float Near;
         public float Far;
 
-        protected Camera(Float3 position, Float3 direction, Float3 up, float near, float far)
+        protected Camera(Float3Sse position, Float3Sse direction, Float3Sse up, float near, float far)
         {
             Position = position;
             Direction = direction;
@@ -27,7 +28,7 @@ namespace Aristarete.Cameras
             Matrix.Invert(LookAt, out LookAtInv);
         }
 
-        public void SetLookAt(Float3 eye, Float3 center, Float3 up)
+        public void SetLookAt(Float3Sse eye, Float3Sse center, Float3Sse up)
         {
             LookAt = Matrix.CreateLookAt(eye, center, up);
             World2View *= LookAt;
@@ -38,20 +39,20 @@ namespace Aristarete.Cameras
             World2View = Matrix.Identity;
         }
 
-        public abstract Float3 ProjectTransformInv(Float2 pointProjected, float depth);
+        public abstract Float3Sse ProjectTransformInv(Float2 pointProjected, float depth);
 
-        public Float3 ViewTransformInv(Float3 pointCamera)
+        public Float3Sse ViewTransformInv(Float3Sse pointCamera)
         {
             return LookAtInv.MultiplyPoint3X4(pointCamera);
         }
 
-        public Float3 ProjectTransform(Float3 pointCamera)
+        public Float3Sse ProjectTransform(Float3Sse pointCamera)
         {
             return View2Proj.MultiplyPoint(pointCamera);
         }
 
 // World space to camera/view space
-        public Float3 ViewTransform(Float3 pointWorld)
+        public Float3Sse ViewTransform(Float3Sse pointWorld)
         {
            return LookAt.MultiplyPoint(pointWorld);
         }

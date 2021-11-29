@@ -2,7 +2,7 @@
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using Aristarete.Basic;
-using Daeira;
+
 using Quaternion = System.Numerics.Quaternion;
 
 namespace Aristarete.Extensions
@@ -83,9 +83,9 @@ namespace Aristarete.Extensions
 
         public static bool IsAboutZero(this float value) => MathF.Abs(value) < float.Epsilon;
 
-        public static Quaternion AngleAxis(float aAngle, Float3 aAxis)
+        public static Quaternion AngleAxis(float aAngle, Float3Sse aAxis)
         {
-            aAxis.Normalize();
+            aAxis.NormalizeExact();
             var rad = aAngle * Deg2Rad * 0.5f;
             aAxis *= MathF.Sin(rad);
             return new Quaternion(aAxis.X, aAxis.Y, aAxis.Z, MathF.Cos(rad));

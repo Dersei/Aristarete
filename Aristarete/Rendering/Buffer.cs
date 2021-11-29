@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using Aristarete.Basic;
-using Daeira;
 
 namespace Aristarete.Rendering
 {

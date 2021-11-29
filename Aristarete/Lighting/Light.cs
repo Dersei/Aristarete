@@ -1,13 +1,13 @@
 ﻿using Aristarete.Basic;
 using Aristarete.Meshes;
 using Aristarete.Rendering;
-using Daeira;
+
 
 namespace Aristarete.Lighting
 {
     public abstract class Light
     {
-        public Float3 Position;
+        public Float3Sse Position;
         public FloatColor Ambient;
         public FloatColor Diffuse;
         public FloatColor Specular;
@@ -34,6 +34,6 @@ namespace Aristarete.Lighting
 
         public abstract FloatColor Calculate(Vertex vertex, Mesh renderable, Rasterizer rasterizer);
 
-        public abstract FloatColor Calculate(DeferredData data, Rasterizer rasterizer);
+        public abstract FloatColor Calculate(in DeferredData data, Rasterizer rasterizer);
     }
 }

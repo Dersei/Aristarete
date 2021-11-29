@@ -1,5 +1,8 @@
 ﻿using Aristarete.Basic;
+using Aristarete.Basic.Materials;
+using Aristarete.Basic.Textures;
 using Aristarete.Cameras;
+using Aristarete.Extensions;
 using Aristarete.Inputting;
 using Aristarete.Lighting;
 using Aristarete.Meshes;
@@ -8,7 +11,7 @@ using Aristarete.Rendering;
 
 namespace Aristarete.Scenes
 {
-    public class Test : Scene
+    public class Final : Scene
     {
         
         private float _angleLeft;
@@ -17,36 +20,57 @@ namespace Aristarete.Scenes
         private float _oldAngleUp;
         private bool _isStopped;
         private readonly PerspectiveCamera _perspectiveCamera = new(new Float3Sse(0, 0, 5), new Float3Sse(0, 0, 0), Float3Sse.Up,45, 2, 0.1f, 100);
-       // private readonly PerspectiveCamera _perspectiveCamera = new PerspectiveCamera(new Float3Sse(0,0,5), -Float3Sse.Forward, Float3Sse.Up, 45, 2, 0.1f, 50);
 
-        public Test(Buffer buffer)
+        public Final(Buffer buffer)
         {
 
+            var circuitryMaterial = new PbrMaterial(FloatColor.White,
+                Texture.LoadFrom("_Resources/circuitry/circuitry-albedo.png").ToInfo(1),
+                Texture.LoadFrom("_Resources/circuitry/circuitry-emission.png").ToInfo(1),
+                Texture.LoadFrom("_Resources/circuitry/circuitry-smoothness.png").ToInfo(1),
+                Texture.LoadFrom("_Resources/circuitry/circuitry-normals.png").ToInfo(1));
             Rasterizer = new DeferredRasterizer(buffer, this,_perspectiveCamera);
             
-            AddMesh(new Cube() {BasicColor = FloatColor.White, LightingMode = LightingMode.Pixel}
+            AddMesh(new Cube {BasicColor = FloatColor.White, LightingMode = LightingMode.Pixel}
+                .SetMaterial(circuitryMaterial)
                 .Scale(0.3f).Rotate(45, Float3Sse.Up).Translate(Float3Sse.Left + Float3Sse.Up));
             AddMesh(new Cube {BasicColor = FloatColor.White, LightingMode = LightingMode.Pixel}
+                .SetMaterial(circuitryMaterial)
                 .Scale(0.3f).Rotate(45, Float3Sse.Up).Translate(Float3Sse.Left + Float3Sse.Down));
             AddMesh(new Cube {BasicColor = FloatColor.White, LightingMode = LightingMode.Pixel}
+                .SetMaterial(circuitryMaterial)
                 .Scale(0.3f).Rotate(45, Float3Sse.Up).Translate(Float3Sse.Right + Float3Sse.Up));
             AddMesh(new Cube {BasicColor = FloatColor.White, LightingMode = LightingMode.Pixel}
+                .SetMaterial(circuitryMaterial)
                 .Scale(0.3f).Rotate(45, Float3Sse.Up).Translate(Float3Sse.Right + Float3Sse.Down));
             AddMesh(new Sphere {BasicColor = FloatColor.White, LightingMode = LightingMode.Pixel}
+                .LoadDiffuseMap("_Resources/lava/lava-albedo.png", 2)
+                .LoadSpecularMap("_Resources/lava/lava-smoothness.png", 2)
+                .LoadEmissiveMap("_Resources/lava/lava-emission.png", 3, 2)
+                .LoadNormalMap("_Resources/lava/lava-normals.png", 2)
                 .Scale(0.3f).Rotate(45, Float3Sse.Up));
             AddMesh(new Cube {BasicColor = FloatColor.White, LightingMode = LightingMode.Pixel}
+                .SetMaterial(circuitryMaterial)
                 .Scale(0.3f).Rotate(45, Float3Sse.Up).Translate(Float3Sse.Left * 2 + Float3Sse.Up));
             AddMesh(new Cube {BasicColor = FloatColor.White, LightingMode = LightingMode.Pixel}
+                .SetMaterial(circuitryMaterial)
                 .Scale(0.3f).Rotate(45, Float3Sse.Up).Translate(Float3Sse.Left * 2 + Float3Sse.Down));
             AddMesh(new Cube {BasicColor = FloatColor.White, LightingMode = LightingMode.Pixel}
+                .SetMaterial(circuitryMaterial)
                 .Scale(0.3f).Rotate(45, Float3Sse.Up).Translate(Float3Sse.Right * 2 + Float3Sse.Up));
             AddMesh(new Cube {BasicColor = FloatColor.White, LightingMode = LightingMode.Pixel}
+                .SetMaterial(circuitryMaterial)
                 .Scale(0.3f).Rotate(45, Float3Sse.Up).Translate(Float3Sse.Right * 2 + Float3Sse.Down));
 
-            AddMesh(new Plane(10, 10, 10, 10)
+            AddMesh(new Plane(3, 3, 10, 10)
                 {
                     BasicColor = FloatColor.White, LightingMode = LightingMode.Pixel
-                }.Rotate(-90, Float3Sse.Right).Translate(Float3Sse.Back));
+                }
+                .LoadDiffuseMap("_Resources/stylized-broken-ice/stylized-broken-ice-basecolor.jpg", 2)
+                .LoadSpecularMap("_Resources/stylized-broken-ice/stylized-broken-ice-glossiness.jpg", 2)
+                .LoadNormalMap("_Resources/stylized-broken-ice/stylized-broken-ice-normal.jpg", 2)
+                .LoadHeightMap("_Resources/stylized-broken-ice/stylized-broken-ice-height.jpg", 2)
+                .Rotate(-90, Float3Sse.Right).Translate(Float3Sse.Back));
             
             // AddLight(new DirectionalLight
             // {

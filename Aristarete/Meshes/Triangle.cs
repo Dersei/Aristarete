@@ -7,7 +7,7 @@ namespace Aristarete.Meshes
         public readonly Vertex First;
         public readonly Vertex Second;
         public readonly Vertex Third;
-        //public readonly Float3 Normal;
+        //public readonly Float3Sse Normal;
 
         public Triangle(Vertex first, Vertex second, Vertex third)
         {

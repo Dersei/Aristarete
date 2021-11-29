@@ -1,6 +1,4 @@
-﻿using Daeira;
-
-namespace Aristarete.Basic.Textures
+﻿namespace Aristarete.Basic.Textures
 {
     public class ConstantColorTexture : ITexture
     {
