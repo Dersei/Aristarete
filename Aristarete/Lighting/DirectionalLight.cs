@@ -1,9 +1,9 @@
 ﻿using System;
-using Aristarete.Basic;
 using Aristarete.Meshes;
 using Aristarete.Rendering;
-using static Aristarete.Extensions.MathExtensions;
-using static Aristarete.Basic.Float3Sse;
+using Daeira;
+using static Daeira.Extensions.MathExtensions;
+using static Daeira.Float3;
 
 namespace Aristarete.Lighting
 {
@@ -12,9 +12,9 @@ namespace Aristarete.Lighting
         public override FloatColor Calculate(Vertex vertex, Mesh renderable, Rasterizer rasterizer)
         {
             var n = renderable.TransformNormals(vertex.Normal)
-                .NormalizeExact() + renderable.Material.GetNormals(vertex.UV);
-            n = n.NormalizeExact();
-            var v = (rasterizer.Camera.Position - vertex.Position).NormalizeExact();
+                .Normalize() + renderable.Material.GetNormals(vertex.UV);
+            n = n.Normalize();
+            var v = (rasterizer.Camera.Position - vertex.Position).Normalize();
             var r = (-Position).Reflect(n);
             var diff = Saturate(Position.Dot(n));
             var spec = diff > 0
@@ -27,8 +27,8 @@ namespace Aristarete.Lighting
         public override FloatColor Calculate(in DeferredData data, Rasterizer rasterizer)
         {
             var n = data.Normal;
-            n = n.NormalizeExact();
-            var v = (rasterizer.Camera.Position - data.Position).NormalizeExact();
+            n = n.Normalize();
+            var v = (rasterizer.Camera.Position - data.Position).Normalize();
             var r = Position.Reflect(n);
             var diff = Saturate(Position.Dot(n));
             var spec = diff > 0

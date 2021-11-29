@@ -1,7 +1,6 @@
-﻿using System.Numerics;
-using Aristarete.Basic;
-using Aristarete.Basic.Materials;
+﻿using Aristarete.Basic.Materials;
 using Aristarete.Basic.Textures;
+using Daeira;
 
 namespace Aristarete.Extensions
 {

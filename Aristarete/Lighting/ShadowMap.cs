@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
-using Aristarete.Basic;
 using Aristarete.Cameras;
 using Aristarete.Rendering;
+using Daeira;
 using Buffer = Aristarete.Rendering.Buffer;
 
 
@@ -30,8 +30,8 @@ namespace Aristarete.Lighting
             _scene = scene;
             _camera = _light switch
             {
-                DirectionalLight dl => new OrthographicCamera(dl.Position, Float3Sse.Zero, Float3Sse.Up, -10f, 10f, -10f, 10f, -10f, 20f),
-                SpotLight sl => new PerspectiveCamera(sl.Position, sl.Direction, Float3Sse.Up, 45, 1, 0.1f, 50),
+                DirectionalLight dl => new OrthographicCamera(dl.Position, Float3.Zero, Float3.Up, -10f, 10f, -10f, 10f, -10f, 20f),
+                SpotLight sl => new PerspectiveCamera(sl.Position, sl.Direction, Float3.Up, 45, 1, 0.1f, 50),
                 _ => throw new ArgumentOutOfRangeException()
             };
             _rasterizer = new ForwardRasterizer(new Buffer(ShadowMapWidth, ShadowMapHeight), scene, _camera);
@@ -39,7 +39,7 @@ namespace Aristarete.Lighting
 
         public void Update()
         {
-            _camera = new OrthographicCamera(_light.Position, Float3Sse.Zero, Float3Sse.Up, -10f, 10f, -10f, 10f, -10f, 20f);
+            _camera = new OrthographicCamera(_light.Position, Float3.Zero, Float3.Up, -10f, 10f, -10f, 10f, -10f, 20f);
             _rasterizer.Clear();
         }
 
@@ -52,7 +52,7 @@ namespace Aristarete.Lighting
             _map = _rasterizer.ZBuffer;
         }
 
-        public float PointInShadow(Float3Sse pointWorld)
+        public float PointInShadow(Float3 pointWorld)
         {
             // var object2View = _camera.World2View * renderable!.Object2World;
             // var object2Projection = _camera.View2Proj * object2View;

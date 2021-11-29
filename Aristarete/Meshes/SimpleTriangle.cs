@@ -1,4 +1,4 @@
-﻿using Aristarete.Basic;
+﻿using Daeira;
 
 
 namespace Aristarete.Meshes
@@ -11,15 +11,15 @@ namespace Aristarete.Meshes
             {
                 new()
                 {
-                    Position = new Float3Sse(-0.5f, 0f, 0f)
+                    Position = new Float3(-0.5f, 0f, 0f)
                 },
                 new()
                 {
-                    Position = new Float3Sse(0f, 0.5f, 0f)
+                    Position = new Float3(0f, 0.5f, 0f)
                 },
                 new()
                 {
-                    Position = new Float3Sse(0.5f, 0f, 0f)
+                    Position = new Float3(0.5f, 0f, 0f)
                 }
             };
 

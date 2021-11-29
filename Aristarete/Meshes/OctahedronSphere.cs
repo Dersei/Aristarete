@@ -1,7 +1,5 @@
 ﻿using System;
-using Aristarete.Basic;
-
-using Float4Sse = Aristarete.Basic.Float4Sse;
+using Daeira;
 
 namespace Aristarete.Meshes
 {
@@ -17,20 +15,20 @@ namespace Aristarete.Meshes
             Create(subdivisions, radius);
         }
 
-        private static Float3Sse[] directions =
+        private static Float3[] directions =
         {
-            Float3Sse.Left,
-            Float3Sse.Back,
-            Float3Sse.Right,
-            Float3Sse.Forward
+            Float3.Left,
+            Float3.Back,
+            Float3.Right,
+            Float3.Forward
         };
 
 
-        private static int CreateVertexLine(Float3Sse from, Float3Sse to, int steps, int v, Float3Sse[] vertices)
+        private static int CreateVertexLine(Float3 from, Float3 to, int steps, int v, Float3[] vertices)
         {
             for (int i = 1; i <= steps; i++)
             {
-                vertices[v++] = Float3Sse.Lerp(from, to, (float) i / steps);
+                vertices[v++] = Float3.Lerp(from, to, (float) i / steps);
             }
 
             return v;
@@ -75,20 +73,20 @@ namespace Aristarete.Meshes
         }
         
         
-        private static void CreateOctahedron (Float3Sse[] vertices, int[] triangles, int resolution) {
+        private static void CreateOctahedron (Float3[] vertices, int[] triangles, int resolution) {
             int v = 0, vBottom = 0, t = 0;
 			
             for (int i = 0; i < 4; i++) {
-                vertices[v++] = Float3Sse.Down;
+                vertices[v++] = Float3.Down;
             }
 
             for (int i = 1; i <= resolution; i++) {
                 float progress = (float)i / resolution;
-                Float3Sse from, to;
-                vertices[v++] = to = Float3Sse.Lerp(Float3Sse.Down, Float3Sse.Forward, progress);
+                Float3 from, to;
+                vertices[v++] = to = Float3.Lerp(Float3.Down, Float3.Forward, progress);
                 for (int d = 0; d < 4; d++) {
                     from = to;
-                    to = Float3Sse.Lerp(Float3Sse.Down, directions[d], progress);
+                    to = Float3.Lerp(Float3.Down, directions[d], progress);
                     t = CreateLowerStrip(i, v, vBottom, t, triangles);
                     v = CreateVertexLine(from, to, i, v, vertices);
                     vBottom += i > 1 ? i - 1 : 1;
@@ -98,11 +96,11 @@ namespace Aristarete.Meshes
 
             for (int i = resolution - 1; i >= 1; i--) {
                 float progress = (float)i / resolution;
-                Float3Sse from, to;
-                vertices[v++] = to = Float3Sse.Lerp(Float3Sse.Up, Float3Sse.Forward, progress);
+                Float3 from, to;
+                vertices[v++] = to = Float3.Lerp(Float3.Up, Float3.Forward, progress);
                 for (int d = 0; d < 4; d++) {
                     from = to;
-                    to = Float3Sse.Lerp(Float3Sse.Up, directions[d], progress);
+                    to = Float3.Lerp(Float3.Up, directions[d], progress);
                     t = CreateUpperStrip(i, v, vBottom, t, triangles);
                     v = CreateVertexLine(from, to, i, v, vertices);
                     vBottom += i + 1;
@@ -114,24 +112,24 @@ namespace Aristarete.Meshes
                 triangles[t++] = vBottom;
                 triangles[t++] = v;
                 triangles[t++] = ++vBottom;
-                vertices[v++] = Float3Sse.Up;
+                vertices[v++] = Float3.Up;
             }
         }
 
-        private static void Normalize(Float3Sse[] vertices, Float3Sse[] normals)
+        private static void Normalize(Float3[] vertices, Float3[] normals)
         {
             for (int i = 0; i < vertices.Length; i++)
             {
-                normals[i] = vertices[i] = vertices[i].NormalizeExact();
+                normals[i] = vertices[i] = vertices[i].Normalize();
             }
         }
 
-        private static void CreateUV(Float3Sse[] vertices, Float2[] uv)
+        private static void CreateUV(Float3[] vertices, Float2[] uv)
         {
             float previousX = 1f;
             for (int i = 0; i < vertices.Length; i++)
             {
-                Float3Sse v = vertices[i];
+                Float3 v = vertices[i];
                 if (v.X == previousX)
                 {
                     uv[i - 1] = new Float2(1, uv[i - 1].Y);
@@ -159,24 +157,24 @@ namespace Aristarete.Meshes
             uv[3] = new Float2(0.875f, uv[3].Y);
         }
 
-        private static void CreateTangents(Float3Sse[] vertices, Float4Sse[] tangents)
+        private static void CreateTangents(Float3[] vertices, Float4[] tangents)
         {
             for (int i = 0; i < vertices.Length; i++)
             {
-                Float3Sse v = vertices[i];
-                v = new Float3Sse(v.X, 0, v.Z).NormalizeExact();
-                Float4Sse tangent = new Float4Sse(-v.Z, 0, v.X, -1);
+                Float3 v = vertices[i];
+                v = new Float3(v.X, 0, v.Z).Normalize();
+                Float4 tangent = new Float4(-v.Z, 0, v.X, -1);
                 tangents[i] = tangent;
             }
 
-            tangents[vertices.Length - 4] = tangents[0] = new Float4Sse(new Float3Sse(-1f, 0, -1f).NormalizeExact(), 0);
-            tangents[vertices.Length - 3] = tangents[1] = new Float4Sse(new Float3Sse(1f, 0f, -1f).NormalizeExact(), 0);
-            tangents[vertices.Length - 2] = tangents[2] = new Float4Sse(new Float3Sse(1f, 0f, 1f).NormalizeExact(), 0);
-            tangents[vertices.Length - 1] = tangents[3] = new Float4Sse(new Float3Sse(-1f, 0f, 1f).NormalizeExact(), 0);
+            tangents[vertices.Length - 4] = tangents[0] = new Float4(new Float3(-1f, 0, -1f).Normalize(), 0);
+            tangents[vertices.Length - 3] = tangents[1] = new Float4(new Float3(1f, 0f, -1f).Normalize(), 0);
+            tangents[vertices.Length - 2] = tangents[2] = new Float4(new Float3(1f, 0f, 1f).Normalize(), 0);
+            tangents[vertices.Length - 1] = tangents[3] = new Float4(new Float3(-1f, 0f, 1f).Normalize(), 0);
             for (int i = 0; i < 4; i++)
             {
-                tangents[vertices.Length - 1 - i] = new Float4Sse(tangents[vertices.Length - 1 - i].XYZ(), -1);
-                tangents[i] = new Float4Sse(tangents[i].XYZ(), -1);
+                tangents[vertices.Length - 1 - i] = new Float4(tangents[vertices.Length - 1 - i].XYZ(), -1);
+                tangents[i] = new Float4(tangents[i].XYZ(), -1);
             }
         }
 
@@ -193,19 +191,19 @@ namespace Aristarete.Meshes
             }
 
             int resolution = 1 << subdivisions;
-            Float3Sse[] vertices = new Float3Sse[(resolution + 1) * (resolution + 1) * 4 - (resolution * 2 - 1) * 3];
+            Float3[] vertices = new Float3[(resolution + 1) * (resolution + 1) * 4 - (resolution * 2 - 1) * 3];
             Console.WriteLine(vertices.Length);
             int[] triangles = new int[(1 << (subdivisions * 2 + 3)) * 3];
             Console.WriteLine(triangles.Length);
             CreateOctahedron(vertices, triangles, resolution);
 			
-            Float3Sse[] normals = new Float3Sse[vertices.Length];
+            Float3[] normals = new Float3[vertices.Length];
             Normalize(vertices, normals);
 
             Float2[] uv = new Float2[vertices.Length];
             CreateUV(vertices, uv);
 
-            Float4Sse[] tangents = new Float4Sse[vertices.Length];
+            Float4[] tangents = new Float4[vertices.Length];
             CreateTangents(vertices, tangents);
 			
             if (radius != 1f) {

@@ -1,5 +1,5 @@
 ﻿using System;
-using Aristarete.Basic;
+using Daeira;
 
 
 namespace Aristarete.Meshes
@@ -22,7 +22,7 @@ namespace Aristarete.Meshes
             const float pi = MathF.PI;
             const float _2pi = pi * 2f;
 
-            vertices[0] = Float3Sse.Up * radius;
+            vertices[0] = Float3.Up * radius;
             for (var lat = 0; lat < latitude; lat++)
             {
                 var a1 = pi * (lat + 1) / (latitude + 1);
@@ -35,15 +35,15 @@ namespace Aristarete.Meshes
                     var sin2 = MathF.Sin(a2);
                     var cos2 = MathF.Cos(a2);
 
-                    vertices[lon + lat * (length + 1) + 1] = new Float3Sse(sin1 * cos2, cos1, sin1 * sin2) * radius;
+                    vertices[lon + lat * (length + 1) + 1] = new Float3(sin1 * cos2, cos1, sin1 * sin2) * radius;
                 }
             }
 
-            vertices[^1] = Float3Sse.Up * -radius;
+            vertices[^1] = Float3.Up * -radius;
 
             for (var n = 0; n < vertices.Length; n++)
             {
-                vertices[n].Normal = vertices[n].Position.NormalizeExact();
+                vertices[n].Normal = vertices[n].Position.Normalize();
             }
 
             Float2[] uvs = new Float2[vertices.Length];

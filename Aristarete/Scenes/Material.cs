@@ -1,9 +1,9 @@
-﻿using Aristarete.Basic;
-using Aristarete.Cameras;
+﻿using Aristarete.Cameras;
 using Aristarete.Inputting;
 using Aristarete.Lighting;
 using Aristarete.Meshes;
 using Aristarete.Rendering;
+using Daeira;
 
 
 namespace Aristarete.Scenes
@@ -16,7 +16,7 @@ namespace Aristarete.Scenes
         private float _oldAngleLeft;
         private float _oldAngleUp;
         private bool _isStopped;
-        private readonly PerspectiveCamera _perspectiveCamera = new(new Float3Sse(0, 0, 5), new Float3Sse(0, 0, 0), Float3Sse.Up,60, 2, 0.1f, 100);
+        private readonly PerspectiveCamera _perspectiveCamera = new(new Float3(0, 0, 5), new Float3(0, 0, 0), Float3.Up,60, 2, 0.1f, 100);
 
       
         public Material(Buffer buffer)
@@ -32,7 +32,7 @@ namespace Aristarete.Scenes
                 .LoadSpecularMap("_Resources/stylized-broken-ice/stylized-broken-ice-glossiness.jpg", 2)
                 .LoadNormalMap("_Resources/stylized-broken-ice/stylized-broken-ice-normal.jpg", 2)
                 .LoadHeightMap("_Resources/stylized-broken-ice/stylized-broken-ice-height.jpg", 2)
-                .Scale(1f).Rotate(230, Float3Sse.Up).Translate(Float3Sse.Left * 2));
+                .Scale(1f).Rotate(230, Float3.Up).Translate(Float3.Left * 2));
             
             AddMesh(new Sphere(1, 24, 24)
                 {
@@ -43,10 +43,10 @@ namespace Aristarete.Scenes
                 .LoadSpecularMap("_Resources/lava/lava-smoothness.png", 2)
                 .LoadEmissiveMap("_Resources/lava/lava-emission.png", 3, 2)
                 .LoadNormalMap("_Resources/lava/lava-normals.png", 2)
-                .Scale(0.7f).Translate(Float3Sse.Right * 2));
+                .Scale(0.7f).Translate(Float3.Right * 2));
 
             AddMesh(new Plane(6, 12, 5, 5)
-                    {BasicColor = FloatColor.White, LightingMode = LightingMode.Pixel}.Rotate(-90, Float3Sse.Right).Translate(Float3Sse.Back * 2)
+                    {BasicColor = FloatColor.White, LightingMode = LightingMode.Pixel}.Rotate(-90, Float3.Right).Translate(Float3.Back * 2)
                 // .LoadDiffuseMap("_Resources/Stylized_15_Grass/Stylized_15_Grass_basecolor.jpg", 4f)
                 // .LoadSpecularMap("_Resources/Stylized_15_Grass/Stylized_15_Grass_glossiness.jpg", 4f)
                 // .LoadNormalMap("_Resources/Stylized_15_Grass/Stylized_15_Grass_normal.jpg", 4f));
@@ -56,7 +56,7 @@ namespace Aristarete.Scenes
             
             AddLight(new DirectionalLight
             {
-                Position = Float3Sse.Forward.NormalizeExact(),
+                Position = Float3.Forward.Normalize(),
                 Ambient = FloatColor.Black,
                 Diffuse = FloatColor.White,
                 Specular = FloatColor.White,
@@ -65,7 +65,7 @@ namespace Aristarete.Scenes
             //
             // AddLight(new PointLight
             // {
-            //     Position = Float3Sse.Back * 5 + Float3Sse.Right * 5,
+            //     Position = Float3.Back * 5 + Float3.Right * 5,
             //     Ambient = FloatColor.Black,
             //     Diffuse = FloatColor.Green,
             //     Specular = FloatColor.White,
@@ -73,7 +73,7 @@ namespace Aristarete.Scenes
             // });
             // AddLight(new PointLight()
             // {
-            //     Position =  Float3Sse.Zero,
+            //     Position =  Float3.Zero,
             //     Ambient = FloatColor.Black,
             //     Diffuse = FloatColor.White,
             //     Specular = FloatColor.Black,
@@ -82,12 +82,12 @@ namespace Aristarete.Scenes
             // //
             // AddLight(new SpotLight
             // {
-            //     Position = new Float3Sse(-2, 0, 5),
+            //     Position = new Float3(-2, 0, 5),
             //     Ambient = FloatColor.Black,
             //     Diffuse = FloatColor.Red,
             //     Specular = FloatColor.White,
             //     Shininess = 32,
-            //     Direction = (Float3Sse.Forward),
+            //     Direction = (Float3.Forward),
             //     Angle = 5
             // });
             
@@ -95,29 +95,29 @@ namespace Aristarete.Scenes
             // //
             // // AddLight(new SpotLight
             // // {
-            // //     Position = new Float3Sse(0, 0, 5) + Float3Sse.Right * 2,
+            // //     Position = new Float3(0, 0, 5) + Float3.Right * 2,
             // //     Ambient = FloatColor.Black,
             // //     Diffuse = FloatColor.Green,
             // //     Specular = FloatColor.White,
             // //     Shininess = 32,
-            // //     Direction = Float3Sse.Forward,
+            // //     Direction = Float3.Forward,
             // //     Angle = 5
             // // });
             // //
             // // AddLight(new SpotLight
             // // {
-            // //     Position = new Float3Sse(0, 0, 5),
+            // //     Position = new Float3(0, 0, 5),
             // //     Ambient = FloatColor.Black,
             // //     Diffuse = FloatColor.Blue,
             // //     Specular = FloatColor.White,
             // //     Shininess = 32,
-            // //     Direction = Float3Sse.Forward,
+            // //     Direction = Float3.Forward,
             // //     Angle = 5
             // // });
             // //
             // // AddLight(new PointLight
             // // {
-            // //     Position = Float3Sse.Back * 5 + Float3Sse.Right * 2,
+            // //     Position = Float3.Back * 5 + Float3.Right * 2,
             // //     Ambient = FloatColor.Black,
             // //     Diffuse = FloatColor.Blue,
             // //     Specular = FloatColor.UnityYellow,
@@ -165,8 +165,8 @@ namespace Aristarete.Scenes
             // var g1 = MathExtensions.Lerp(-1, 1,
             //     MathExtensions.PingPong((float) Time.RealGameTime.TotalMilliseconds / 1000, 1));
             // g1 /= 4f;
-            // (Statics.Lights[1] as SpotLight).Direction = (Float3Sse.Forward + Float3Sse.Right * g1);
-            // (Statics.Lights[2] as SpotLight).Position = new Float3Sse(0, 0, 5) + 2 * Float3Sse.Right + Float3Sse.Up * g1;
+            // (Statics.Lights[1] as SpotLight).Direction = (Float3.Forward + Float3.Right * g1);
+            // (Statics.Lights[2] as SpotLight).Position = new Float3(0, 0, 5) + 2 * Float3.Right + Float3.Up * g1;
             // (Statics.Lights[3] as SpotLight).Angle = g * 7 + 1;
             Rasterizer.CreateShadowMaps(_shadowUpdate);
             _shadowUpdate = false;

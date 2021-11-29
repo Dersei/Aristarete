@@ -1,13 +1,13 @@
-﻿using Aristarete.Basic;
-using Aristarete.Meshes;
+﻿using Aristarete.Meshes;
 using Aristarete.Rendering;
+using Daeira;
 
 
 namespace Aristarete.Lighting
 {
     public abstract class Light
     {
-        public Float3Sse Position;
+        public Float3 Position;
         public FloatColor Ambient;
         public FloatColor Diffuse;
         public FloatColor Specular;

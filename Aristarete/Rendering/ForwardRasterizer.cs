@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Aristarete.Basic;
 using Aristarete.Cameras;
 using Aristarete.Meshes;
+using Daeira;
 
 
 namespace Aristarete.Rendering
@@ -16,8 +16,8 @@ namespace Aristarete.Rendering
         private static readonly (FloatColor first, FloatColor second, FloatColor third) LightingNoneColors = (
             FloatColor.White, FloatColor.White, FloatColor.White);
 
-        private (FloatColor first, FloatColor second, FloatColor third) CalculateLight(in Triangle triangle, Float3Sse[] worldCoords,
-            Mesh mesh, Float3Sse barycentric, LightingMode mode)
+        private (FloatColor first, FloatColor second, FloatColor third) CalculateLight(in Triangle triangle, Float3[] worldCoords,
+            Mesh mesh, Float3 barycentric, LightingMode mode)
         {
             switch (mode)
             {
@@ -82,11 +82,11 @@ namespace Aristarete.Rendering
             });
         }
 
-        public override void Triangle(in Triangle triangle, Float3Sse[] screenCords, Float3Sse[] worldCoords, Mesh mesh,
+        public override void Triangle(in Triangle triangle, Float3[] screenCords, Float3[] worldCoords, Mesh mesh,
             LightingMode lightingMode,
             RenderMode renderMode = RenderMode.Color)
         {
-            Float3Sse[] bufferCoords = new Float3Sse[3];
+            Float3[] bufferCoords = new Float3[3];
             bufferCoords[0] = ToBufferCoords(screenCords[0]);
             bufferCoords[1] = ToBufferCoords(screenCords[1]);
             bufferCoords[2] = ToBufferCoords(screenCords[2]);

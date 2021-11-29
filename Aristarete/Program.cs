@@ -1,6 +1,6 @@
 ﻿using System;
-using Aristarete.Basic;
 using Aristarete.Scenes;
+using Daeira;
 using Buffer = Aristarete.Rendering.Buffer;
 
 namespace Aristarete
@@ -12,7 +12,7 @@ namespace Aristarete
         {
             var buffer = new Buffer(1440, 720);
             buffer.Clear(FloatColor.Black);
-            var displayWindow = new DisplayWindow(new Castle(buffer));
+            var displayWindow = new DisplayWindow(new Test(buffer));
             displayWindow.Display();
         }
     }

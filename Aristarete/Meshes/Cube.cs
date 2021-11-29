@@ -1,4 +1,4 @@
-﻿using Aristarete.Basic;
+﻿using Daeira;
 
 
 namespace Aristarete.Meshes
@@ -81,14 +81,14 @@ namespace Aristarete.Meshes
                 _11, _01, _00, _10,
             };
 
-            Float3Sse up 	= Float3Sse.Up;
-            Float3Sse down 	= Float3Sse.Down;
-            Float3Sse front 	= Float3Sse.Forward;
-            Float3Sse back 	= Float3Sse.Back;
-            Float3Sse left 	= Float3Sse.Left;
-            Float3Sse right 	= Float3Sse.Right;
+            Float3 up 	= Float3.Up;
+            Float3 down 	= Float3.Down;
+            Float3 front 	= Float3.Forward;
+            Float3 back 	= Float3.Back;
+            Float3 left 	= Float3.Left;
+            Float3 right 	= Float3.Right;
  
-            Float3Sse[] normales = new Float3Sse[]
+            Float3[] normales = new Float3[]
             {
                 // Bottom
                 down, down, down, down,

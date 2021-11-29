@@ -1,6 +1,6 @@
 ﻿using System;
-using Aristarete.Basic;
-using Aristarete.Extensions;
+using Daeira.Extensions;
+using Daeira;
 
 
 namespace Aristarete.Meshes
@@ -27,48 +27,48 @@ namespace Aristarete.Meshes
                 var currSeg = seg == radiusSegments ? 0 : seg;
 
                 var t1 = (float) currSeg / radiusSegments * _2pi;
-                var r1 = new Float3Sse(MathF.Cos(t1) * radius1, 0f, MathF.Sin(t1) * radius1);
+                var r1 = new Float3(MathF.Cos(t1) * radius1, 0f, MathF.Sin(t1) * radius1);
 
                 for (var side = 0; side <= sides; side++)
                 {
                     var currSide = side == sides ? 0 : side;
 
                     var t2 = (float) currSide / sides * _2pi;
-                    var r2 = Float3Sse.FromBuiltIn(MathExtensions.Rotate(
-                        MathExtensions.AngleAxis(-t1 * MathExtensions.Rad2Deg, Float3Sse.Up),
-                        new Float3Sse(MathF.Sin(t2) * radius2, MathF.Cos(t2) * radius2, 0).ToBuiltIn()));
+                    var r2 = Quaternion.Rotate(
+                        Quaternion.AngleAxis(-t1 * MathExtensions.Rad2Deg, Float3.Up),
+                        new Float3(MathF.Sin(t2) * radius2, MathF.Cos(t2) * radius2, 0));
 
                     vertices[side + seg * (sides + 1)] = r1 + r2;
                 }
             }
 
             Float2[] uvs = new Float2[vertices.Length];
-            for (int seg = 0; seg <= radiusSegments; seg++)
+            for (var seg = 0; seg <= radiusSegments; seg++)
             {
-                for (int side = 0; side <= sides; side++)
+                for (var side = 0; side <= sides; side++)
                 {
                     uvs[side + seg * (sides + 1)] = new Float2((float) seg / radiusSegments, (float) side / sides);
                 }
             }
 
 
-            Float3Sse[] normales = new Float3Sse[vertices.Length];
-            for (int seg = 0; seg <= radiusSegments; seg++)
+            Float3[] normals = new Float3[vertices.Length];
+            for (var seg = 0; seg <= radiusSegments; seg++)
             {
-                int currSeg = seg == radiusSegments ? 0 : seg;
+                var currSeg = seg == radiusSegments ? 0 : seg;
 
-                float t1 = (float) currSeg / radiusSegments * _2pi;
-                Float3Sse r1 = new Float3Sse(MathF.Cos(t1) * radius1, 0f, MathF.Sin(t1) * radius1);
+                var t1 = (float) currSeg / radiusSegments * _2pi;
+                var r1 = new Float3(MathF.Cos(t1) * radius1, 0f, MathF.Sin(t1) * radius1);
 
-                for (int side = 0; side <= sides; side++)
+                for (var side = 0; side <= sides; side++)
                 {
-                    normales[side + seg * (sides + 1)] = (vertices[side + seg * (sides + 1)].Position - r1).NormalizeExact();
+                    normals[side + seg * (sides + 1)] = (vertices[side + seg * (sides + 1)].Position - r1).Normalize();
                 }
             }
 
-            for (int j = 0; j < vertices.Length; j++)
+            for (var j = 0; j < vertices.Length; j++)
             {
-                vertices[j].Normal = normales[j];
+                vertices[j].Normal = normals[j];
             }
 
             var facesNumber = vertices.Length;

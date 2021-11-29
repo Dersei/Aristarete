@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Aristarete.Basic;
 using Aristarete.Basic.Materials;
 using Aristarete.Basic.Textures;
 using Aristarete.Rendering;
-
-using Matrix = Aristarete.Basic.Matrix;
+using Daeira;
 
 namespace Aristarete.Meshes
 {
@@ -14,8 +12,8 @@ namespace Aristarete.Meshes
         public Vertex[] Vertices = null!;
         public Int3[] Indices = null!;
         public List<Triangle> Triangles = null!;
-        public readonly List<Float3Sse[]> ScreenCoords = new();
-        public readonly List<Float3Sse[]> WorldCoords = new();
+        public readonly List<Float3[]> ScreenCoords = new();
+        public readonly List<Float3[]> WorldCoords = new();
         private FloatColor _basicColor;
         public Matrix Object2World = Matrix.Identity;
         public Matrix Object2Projection = Matrix.Identity;
@@ -46,21 +44,21 @@ namespace Aristarete.Meshes
             Object2World = Matrix.Identity;
         }
 
-        public Mesh Rotate(float angle, Float3Sse v)
+        public Mesh Rotate(float angle, Float3 v)
         {
             Object2World = Matrix.Rotate(angle, v) * Object2World;
             IsDirty = true;
             return this;
         }
 
-        public Mesh Translate(Float3Sse v)
+        public Mesh Translate(Float3 v)
         {
             Object2World = Matrix.Translate(v) * Object2World;
             IsDirty = true;
             return this;
         }
 
-        public Mesh Scale(Float3Sse v)
+        public Mesh Scale(Float3 v)
         {
             Object2World = Matrix.Scale(v) * Object2World;
             IsDirty = true;
@@ -69,7 +67,7 @@ namespace Aristarete.Meshes
 
         public Mesh Scale(float v)
         {
-            Object2World = Matrix.Scale(new Float3Sse(v)) * Object2World;
+            Object2World = Matrix.Scale(new Float3(v)) * Object2World;
             IsDirty = true;
             return this;
         }
@@ -125,18 +123,18 @@ namespace Aristarete.Meshes
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Float3Sse Apply(Float3Sse f) => Object2Projection.MultiplyPoint(f);
+        public Float3 Apply(Float3 f) => Object2Projection.MultiplyPoint(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Float3Sse ApplyWorld(Float3Sse f) => Object2World.MultiplyPoint(f);
+        public Float3 ApplyWorld(Float3 f) => Object2World.MultiplyPoint(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Float3Sse ApplyView(Float3Sse f) => Object2View.MultiplyPoint(f);
+        public Float3 ApplyView(Float3 f) => Object2View.MultiplyPoint(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Float3Sse TransformNormals(Float3Sse f) => Object2View.MultiplyVector(f);
+        public Float3 TransformNormals(Float3 f) => Object2View.MultiplyVector(f);
 
-        // public Float3Sse TransformNormals(Float3Sse f) => Matrix.MultiplyVector(Object2View,f);
+        // public Float3 TransformNormals(Float3 f) => Matrix.MultiplyVector(Object2View,f);
 
         public void UpdateCoords()
         {
@@ -145,8 +143,8 @@ namespace Aristarete.Meshes
                 for (var i = 0; i < Triangles.Count; i++)
                 {
                     var triangle = Triangles[i];
-                    var screenCoords = new Float3Sse[3];
-                    var worldCoords = new Float3Sse[3];
+                    var screenCoords = new Float3[3];
+                    var worldCoords = new Float3[3];
 
                     for (var j = 0; j < 3; j++)
                     {
@@ -212,7 +210,7 @@ namespace Aristarete.Meshes
         {
             for (var i = 0; i < Vertices.Length; i++)
             {
-                Vertices[i].Normal = Float3Sse.Zero;
+                Vertices[i].Normal = Float3.Zero;
             }
 
             for (var i = 0; i < Indices.Length; i++)
@@ -227,7 +225,7 @@ namespace Aristarete.Meshes
 
             for (var i = 0; i < Vertices.Length; i++)
             {
-                Vertices[i].Normal = Float3Sse.Normalize(Vertices[i].Normal);
+                Vertices[i].Normal = Float3.Normalize(Vertices[i].Normal);
             }
 
             return this;

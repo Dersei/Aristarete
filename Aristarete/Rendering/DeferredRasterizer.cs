@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Aristarete.Basic;
 using Aristarete.Cameras;
 using Aristarete.Meshes;
+using Daeira;
 
 
 namespace Aristarete.Rendering
@@ -13,8 +13,8 @@ namespace Aristarete.Rendering
         private readonly FloatColor[] _colorBuffer;
         private readonly FloatColor[] _specularBuffer;
         private readonly FloatColor[] _emissionBuffer;
-        private readonly Float3Sse[] _normalBuffer;
-        private readonly Float3Sse[] _worldPositionBuffer;
+        private readonly Float3[] _normalBuffer;
+        private readonly Float3[] _worldPositionBuffer;
 
         private readonly int Size;
 
@@ -25,14 +25,14 @@ namespace Aristarete.Rendering
             _colorBuffer = new FloatColor[Width * Height];
             _specularBuffer = new FloatColor[Width * Height];
             _emissionBuffer = new FloatColor[Width * Height];
-            _normalBuffer = new Float3Sse[Width * Height];
-            _worldPositionBuffer = new Float3Sse[Width * Height];
+            _normalBuffer = new Float3[Width * Height];
+            _worldPositionBuffer = new Float3[Width * Height];
             Array.Fill(_diffuseBuffer, FloatColor.Black);
             Array.Fill(_colorBuffer, FloatColor.Black);
             Array.Fill(_specularBuffer, FloatColor.Black);
             Array.Fill(_emissionBuffer, FloatColor.Black);
-            Array.Fill(_normalBuffer, Float3Sse.One);
-            Array.Fill(_worldPositionBuffer, Float3Sse.Zero);
+            Array.Fill(_normalBuffer, Float3.One);
+            Array.Fill(_worldPositionBuffer, Float3.Zero);
         }
 
         public override void Render(RenderMode renderMode = RenderMode.Color)
@@ -61,11 +61,11 @@ namespace Aristarete.Rendering
             return colorLight;
         }
 
-        public override void Triangle(in Triangle triangle, Float3Sse[] screenCords, Float3Sse[] worldCoords, Mesh mesh,
+        public override void Triangle(in Triangle triangle, Float3[] screenCords, Float3[] worldCoords, Mesh mesh,
             LightingMode lightingMode,
             RenderMode renderMode = RenderMode.Color)
         {
-            Float3Sse[] bufferCoords = new Float3Sse[3];
+            Float3[] bufferCoords = new Float3[3];
             bufferCoords[0] = ToBufferCoords(screenCords[0]);
             bufferCoords[1] = ToBufferCoords(screenCords[1]);
             bufferCoords[2] = ToBufferCoords(screenCords[2]);
@@ -117,8 +117,8 @@ namespace Aristarete.Rendering
                                          triangle.Third.Normal * barycentric.Z;
                             var index = (int) (x + y * Width);
                             var n = mesh.TransformNormals(normal)
-                                .NormalizeExact() + mesh.Material.GetNormals(uv);
-                            n = n.NormalizeExact();
+                                .Normalize() + mesh.Material.GetNormals(uv);
+                            n = n.Normalize();
                             _normalBuffer[index] = n;
                             _colorBuffer[index] = mesh.Material.Color;
                             _diffuseBuffer[index] = mesh.Material.GetDiffuse(uv);

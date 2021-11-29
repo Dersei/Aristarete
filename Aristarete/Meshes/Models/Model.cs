@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Aristarete.Basic;
 using Aristarete.Basic.Materials;
 using Aristarete.Utils;
+using Daeira;
 
 
 namespace Aristarete.Meshes.Models
@@ -13,8 +13,8 @@ namespace Aristarete.Meshes.Models
     public class Model
     {
         public List<Triangle> Triangles { get; } = new();
-        public List<Float3Sse> Vertices { get; } = new();
-        public List<Float3Sse> Normals { get; } = new();
+        public List<Float3> Vertices { get; } = new();
+        public List<Float3> Normals { get; } = new();
         public List<Int3[]> Faces { get; } = new();
         public List<Float2> UV { get; } = new();
 
@@ -25,7 +25,7 @@ namespace Aristarete.Meshes.Models
         }
 
         public static Model LoadFromFile(string filename, PbrMaterial material, float scale = 1f,
-            Float3Sse position = default, Float3Sse rotationAxis = default, float angle = 0)
+            Float3 position = default, Float3 rotationAxis = default, float angle = 0)
         {
             using var stream = new StreamReader(filename);
             var model = new Model {Material = material};
@@ -41,7 +41,7 @@ namespace Aristarete.Meshes.Models
                     var array = line.Split(" ", StringSplitOptions.RemoveEmptyEntries).Skip(1)
                         .Select(v => float.Parse(v, CultureInfo.InvariantCulture))
                         .ToArray();
-                    model.Vertices.Add(Float3Sse.Transform(new Float3Sse(array[0], array[1], array[2]), scale, position,
+                    model.Vertices.Add(Float3.Transform(new Float3(array[0], array[1], array[2]), scale, position,
                         rotationAxis, angle));
                 }
                 else if (line.StartsWith("f "))
@@ -62,7 +62,7 @@ namespace Aristarete.Meshes.Models
                     var array = line.Split(" ", StringSplitOptions.RemoveEmptyEntries).Skip(1)
                         .Select(v => float.Parse(v, CultureInfo.InvariantCulture))
                         .ToArray();
-                    model.Normals.Add(new Float3Sse(array[0], array[1], array[2]));
+                    model.Normals.Add(new Float3(array[0], array[1], array[2]));
                 }
             }
 
@@ -82,7 +82,7 @@ namespace Aristarete.Meshes.Models
         }
 
         public static Model LoadFromFileSafe(string filename, PbrMaterial material, float scale = 1f,
-            Float3Sse position = default, Float3Sse rotationAxis = default, float angle = 0)
+            Float3 position = default, Float3 rotationAxis = default, float angle = 0)
         {
             var obj = new Model();
             try
@@ -103,8 +103,8 @@ namespace Aristarete.Meshes.Models
         }
 
 
-        private static Model LoadFromStringSafe(string text, PbrMaterial material, float scale, Float3Sse position,
-            Float3Sse rotationAxis, float angle)
+        private static Model LoadFromStringSafe(string text, PbrMaterial material, float scale, Float3 position,
+            Float3 rotationAxis, float angle)
         {
             const NumberStyles style = NumberStyles.Number;
             var culture = CultureInfo.CreateSpecificCulture("en-GB");
@@ -124,7 +124,7 @@ namespace Aristarete.Meshes.Models
                     // Cut off beginning of line
                     var temp = line.Substring(2);
 
-                    Float3Sse? vec = null;
+                    Float3? vec = null;
 
                     if (temp.Trim().Count(c => c == ' ') == 2) // Check if there's enough elements for a vertex
                     {
@@ -135,8 +135,8 @@ namespace Aristarete.Meshes.Models
                         success |= float.TryParse(vertexParts[1], style, culture, out var y);
                         success |= float.TryParse(vertexParts[2], style, culture, out var z);
 
-                        vec = new Float3Sse(x, y, z);
-                        vec = Float3Sse.Transform(vec.Value, scale, position, rotationAxis, angle);
+                        vec = new Float3(x, y, z);
+                        vec = Float3.Transform(vec.Value, scale, position, rotationAxis, angle);
                         // If any of the parses failed, report the error
                         if (!success)
                         {
@@ -148,7 +148,7 @@ namespace Aristarete.Meshes.Models
                         Logger.LogConsole($"Error parsing vertex: {line}");
                     }
 
-                    model.Vertices.Add(vec ?? new Float3Sse());
+                    model.Vertices.Add(vec ?? new Float3());
                 }
                 else if (line.StartsWith("vt ")) // Texture coordinate
                 {
@@ -185,7 +185,7 @@ namespace Aristarete.Meshes.Models
                     // Cut off beginning of line
                     var temp = line.Substring(2);
 
-                    Float3Sse? vec = null;
+                    Float3? vec = null;
 
                     if (temp.Trim().Count(c => c == ' ') == 2) // Check if there's enough elements for a normal
                     {
@@ -196,7 +196,7 @@ namespace Aristarete.Meshes.Models
                         success |= float.TryParse(vertexParts[1], style, culture, out var y);
                         success |= float.TryParse(vertexParts[2], style, culture, out var z);
 
-                        vec = new Float3Sse(x, y, z);
+                        vec = new Float3(x, y, z);
 
                         // If any of the parses failed, report the error
                         if (!success)
@@ -209,7 +209,7 @@ namespace Aristarete.Meshes.Models
                         Logger.LogConsole($"Error parsing normal: {line}");
                     }
 
-                    model.Normals.Add(vec ?? new Float3Sse());
+                    model.Normals.Add(vec ?? new Float3());
                 }
                 else if (line.StartsWith("f ")) // Face definition
                 {
